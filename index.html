@@ -101,9 +101,9 @@
         if (!res.ok) throw new Error('config.json 로드 실패')
         const config = await res.json();
 
-        const authCode = config.SUPABASE_URL;
-        const apiKey = config.SUPABASE_ANON_KEY;
-        const spreadsheetId = config.MAP_API;
+        const authCode = config.AUTH_CODE;
+        const apiKey = config.API_KEY;
+        const spreadsheetId = config.SPREADSHEET_ID;
 
         console.log('가져온 환경변수 확인:', { authCode, apiKey, spreadsheetId });
       } catch (err) {
@@ -111,7 +111,7 @@
       }
     }
     getAuthCode();
-    
+
     const btnSettings = document.getElementById('btn-settings');
     const btnCloseDialog = document.getElementById('btn-close-dialog');
     const btnCancelAuthDialog = document.getElementById('btn-cancel-auth-dialog');
