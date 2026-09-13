@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>구독 & 고정지출 관리 대시보드</title>
+  <!-- Tailwind CSS & Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    @font-face {font-family: 'GMarketSans';src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansLight.woff') format('woff');font-weight: 300;font-display: swap;}
+    @font-face {font-family: 'GMarketSans';src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff');font-weight: 500;font-display: swap;}
+    @font-face {font-family: 'GMarketSans';src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff') format('woff');font-weight: 700;font-display: swap;}
+    html {font-family: "GMarketSans";}
+    .table-scroll { max-height: 480px; overflow-y: auto; }
+    .table-scroll th { position: sticky; top: 0; z-index: 10; background-color: #f8fafc; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- 상단 네비게이션 헤더 -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 sm:px-8 py-3 shadow-xs">
+    <div class="max-w-[1440px] mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-lg shadow-sm">
+          💳
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">구독 & 고정지출 매니저</h1>
+          <p class="text-[11px] text-slate-400">구글 스프레드시트 실시간 연동 지출 분석</p>
+        </div>
+      </div>
+
+      <!-- 기준 월 선택 및 새로고침 -->
+      <div class="flex items-center gap-2">
+        <span id="data-status-badge" class="px-2.5 py-1 text-[11px] font-semibold rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200">
+          ● 실시간 연결
+        </span>
+        <select id="select-month" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 outline-none cursor-pointer transition-all">
+          <option value="2026-03">2026년 3월</option>
+          <option value="2026-02">2026년 2월</option>
+          <option value="2026-01">2026년 1월</option>
+        </select>
+        <button id="btn-refresh" class="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer" title="데이터 새로고침">
+          🔄
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 메인 대시보드 영역 -->
+  <main class="max-w-[1440px] w-full mx-auto px-4 sm:px-8 py-6 flex-1 space-y-6">
+
+    <!-- 1. 상단 핵심 KPI 요약 카드 그리드 (5개 카드: 보험료 분리) -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <!-- KPI 1: 총 고정 지출 -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
+        <div class="flex items-center justify-between text-xs font-semibold text-slate-500 mb-2">
+          <span>총 고정지출 합계</span>
+          <span class="p-2 rounded-xl bg-indigo-50 text-indigo-600">💰</span>
+        </div>
+        <div>
+          <div id="kpi-total-amount" class="text-2xl font-extrabold text-slate-900">0원</div>
+          <div id="kpi-total-diff" class="text-xs font-medium text-slate-400 mt-1 flex items-center gap-1">
+            전월 대비 산출 중...
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI 2: 구독 서비스 -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
+        <div class="flex items-center justify-between text-xs font-semibold text-slate-500 mb-2">
+          <span>구독 서비스</span>
+          <span class="p-2 rounded-xl bg-purple-50 text-purple-600">📺</span>
+        </div>
+        <div>
+          <div id="kpi-sub-amount" class="text-2xl font-extrabold text-purple-600">0원</div>
+          <div id="kpi-sub-count" class="text-xs text-slate-400 mt-1">0개 서비스 이용 중</div>
+        </div>
+      </div>
+
+      <!-- KPI 3: 생활 고정비 (보험 제외: 관리비/통신/렌탈 등) -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
+        <div class="flex items-center justify-between text-xs font-semibold text-slate-500 mb-2">
+          <span>생활 고정비 (관리비/통신)</span>
+          <span class="p-2 rounded-xl bg-blue-50 text-blue-600">🏠</span>
+        </div>
+        <div>
+          <div id="kpi-fixed-amount" class="text-2xl font-extrabold text-blue-600">0원</div>
+          <div id="kpi-fixed-count" class="text-xs text-slate-400 mt-1">0개 항목 결제 중</div>
+        </div>
+      </div>
+
+      <!-- KPI 4: 🛡️ 보험료 합계 (분리 신설) -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
+        <div class="flex items-center justify-between text-xs font-semibold text-slate-500 mb-2">
+          <span>보험료 합계</span>
+          <span class="p-2 rounded-xl bg-emerald-50 text-emerald-600">🛡️</span>
+        </div>
+        <div>
+          <div id="kpi-insurance-amount" class="text-2xl font-extrabold text-emerald-600">0원</div>
+          <div id="kpi-insurance-count" class="text-xs text-slate-400 mt-1">0건 가입 중</div>
+        </div>
+      </div>
+
+      <!-- KPI 5: 이번 주 결제 예정 -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
+        <div class="flex items-center justify-between text-xs font-semibold text-slate-500 mb-2">
+          <span>7일 이내 결제 예정</span>
+          <span class="p-2 rounded-xl bg-amber-50 text-amber-600">⏰</span>
+        </div>
+        <div>
+          <div id="kpi-upcoming-amount" class="text-2xl font-extrabold text-amber-600">0원</div>
+          <div id="kpi-upcoming-count" class="text-xs text-slate-400 mt-1">0건 결제 대기</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 차트 영역 (좌: 월별 지출 추이 변화도 3단 스택, 우: 카테고리별 비중) -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+      <!-- 월별 지출 추이 (2열 차지) -->
+      <div class="lg:col-span-2 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+              <span>📊</span> 월별 고정지출 변화도 추이
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">구독료 · 생활고정비 · 보험료 3대 지출 월별 비교</p>
+          </div>
+          <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">3단 스택 비교</span>
+        </div>
+        <div class="w-full h-64 sm:h-72">
+          <canvas id="monthlyTrendChart"></canvas>
+        </div>
+      </div>
+
+      <!-- 카테고리별 비중 도넛 차트 (1열 차지) -->
+      <div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+              <span>🍩</span> 카테고리별 지출 비중
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">선택된 월 기준 지출 구성</p>
+          </div>
+        </div>
+        <div class="w-full h-56 sm:h-64 flex items-center justify-center">
+          <canvas id="categoryDonutChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 상세 지출 목록 테이블 및 필터/검색 -->
+    <section class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-xs">
+      <!-- 필터 바 & 검색창 -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
+        <!-- 카테고리 탭 -->
+        <div id="filter-tabs" class="flex flex-wrap items-center gap-1.5">
+          <button data-cat="ALL" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-xs transition-all cursor-pointer">전체</button>
+          <button data-cat="구독" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all cursor-pointer">📺 구독서비스</button>
+          <button data-cat="통신비" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all cursor-pointer">📱 통신비</button>
+          <button data-cat="관리비" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all cursor-pointer">🏠 관리비/주거</button>
+          <button data-cat="보험" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all cursor-pointer">🛡️ 보험/금융</button>
+        </div>
+
+        <!-- 검색창 -->
+        <div class="relative w-full sm:w-64">
+          <input type="text" id="input-search" placeholder="서비스명, 메모, 결제수단 검색..."
+            class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 focus:bg-white transition-all">
+          <span class="absolute left-2.5 top-2 text-xs text-slate-400">🔍</span>
+        </div>
+      </div>
+
+      <!-- 지출 데이터 테이블 -->
+      <div class="table-scroll border border-slate-100 rounded-xl">
+        <table class="w-full border-collapse text-left text-xs">
+          <thead>
+            <tr class="bg-slate-50 text-slate-600 border-b border-slate-200 font-semibold">
+              <th class="px-4 py-3 whitespace-nowrap">구분</th>
+              <th class="px-4 py-3 whitespace-nowrap">서비스 / 항목명</th>
+              <th class="px-4 py-3 whitespace-nowrap">세부 카테고리</th>
+              <th class="px-4 py-3 whitespace-nowrap text-center">결제일 (D-Day)</th>
+              <th class="px-4 py-3 whitespace-nowrap text-right">전월 금액</th>
+              <th class="px-4 py-3 whitespace-nowrap text-right">이번달 금액</th>
+              <th class="px-4 py-3 whitespace-nowrap text-center">전월 대비 변화</th>
+              <th class="hidden sm:table-cell px-4 py-3 whitespace-nowrap">결제수단</th>
+              <th class="hidden sm:table-cell px-4 py-3 whitespace-nowrap">비고</th>
+            </tr>
+          </thead>
+          <tbody id="expense-table-body" class="divide-y divide-slate-100 text-slate-700">
+            <!-- 자바스크립트로 동적 렌더링 -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script type="module">
+    // ==========================================
+    // 1. 설정 로드 및 Google Sheets API 설정
+    // ==========================================
+    async function getConfig(key) {
+      try {
+        const res = await fetch('./config.json');
+        if (!res.ok) throw new Error('config.json 로드 실패');
+        const data = await res.json();
+        return String(data[key] || '').trim();
+      } catch (err) {
+        console.warn('config.json 로드 실패, 기본값/샘플 모드로 동작합니다.');
+        return null;
+      }
+    }
+
+    const API_KEY = await getConfig('API_KEY');
+    const SPREADSHEET_ID = await getConfig('spread_id') || await getConfig('SPREADSHEET_ID');
+    // 'Subscription' 시트 우선 조회, 실패 시 기본 시트
+    const RANGE = "Subscription!A:I";
+    const sheetUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${RANGE}?key=${API_KEY}`;
+
+    // ==========================================
+    // 2. 현실적인 기본 샘플 데이터 (폴백 및 시연용)
+    // ==========================================
+    const mockExpenseData = [
+      // 2026-03 데이터
+      { id: '1', name: '넷플릭스', category: '구독', sub_category: 'OTT', payment_day: 15, amount: 17000, month: '2026-03', payment_method: '신한카드', memo: '프리미엄 4인' },
+      { id: '2', name: '유튜브 프리미엄', category: '구독', sub_category: '미디어', payment_day: 21, amount: 14900, month: '2026-03', payment_method: '현대카드', memo: '패밀리' },
+      { id: '3', name: '쿠팡 로켓와우', category: '구독', sub_category: '쇼핑', payment_day: 5, amount: 7890, month: '2026-03', payment_method: '국민카드', memo: '새벽배송' },
+      { id: '4', name: 'ChatGPT Plus', category: '구독', sub_category: 'AI/SW', payment_day: 18, amount: 29000, month: '2026-03', payment_method: '신한카드', memo: '업무용' },
+      { id: '5', name: 'SKT 휴대폰 요금', category: '고정지출', sub_category: '통신비', payment_day: 25, amount: 75000, month: '2026-03', payment_method: '자동이체', memo: '데이터 무제한' },
+      { id: '6', name: 'SKB 기가인터넷+TV', category: '고정지출', sub_category: '통신비', payment_day: 25, amount: 38500, month: '2026-03', payment_method: '자동이체', memo: '결합할인' },
+      { id: '7', name: '아파트 관리비', category: '고정지출', sub_category: '관리비', payment_day: 28, amount: 245000, month: '2026-03', payment_method: '자동이체', memo: '난방비 포함' },
+      { id: '8', name: '도시가스 요금', category: '고정지출', sub_category: '관리비', payment_day: 12, amount: 64000, month: '2026-03', payment_method: '국민카드', memo: '동절기 난방' },
+      { id: '9', name: '실비+종합건강보험', category: '보험', sub_category: '보험', payment_day: 10, amount: 89000, month: '2026-03', payment_method: '자동이체', memo: '현대해상' },
+      { id: '10', name: '운전자보험', category: '보험', sub_category: '보험', payment_day: 10, amount: 23000, month: '2026-03', payment_method: '자동이체', memo: 'DB손해보험' },
+      { id: '11', name: '코웨이 정수기 렌탈', category: '고정지출', sub_category: '렌탈', payment_day: 14, amount: 31900, month: '2026-03', payment_method: '현대카드', memo: '얼음정수기' },
+
+      // 2026-02 비교 데이터
+      { id: '1', name: '넷플릭스', category: '구독', sub_category: 'OTT', payment_day: 15, amount: 17000, month: '2026-02', payment_method: '신한카드', memo: '' },
+      { id: '2', name: '유튜브 프리미엄', category: '구독', sub_category: '미디어', payment_day: 21, amount: 14900, month: '2026-02', payment_method: '현대카드', memo: '' },
+      { id: '3', name: '쿠팡 로켓와우', category: '구독', sub_category: '쇼핑', payment_day: 5, amount: 4990, month: '2026-02', payment_method: '국민카드', memo: '인상전 요금' },
+      { id: '4', name: 'ChatGPT Plus', category: '구독', sub_category: 'AI/SW', payment_day: 18, amount: 28500, month: '2026-02', payment_method: '신한카드', memo: '환율변동' },
+      { id: '5', name: 'SKT 휴대폰 요금', category: '고정지출', sub_category: '통신비', payment_day: 25, amount: 75000, month: '2026-02', payment_method: '자동이체', memo: '' },
+      { id: '6', name: 'SKB 기가인터넷+TV', category: '고정지출', sub_category: '통신비', payment_day: 25, amount: 38500, month: '2026-02', payment_method: '자동이체', memo: '' },
+      { id: '7', name: '아파트 관리비', category: '고정지출', sub_category: '관리비', payment_day: 28, amount: 268000, month: '2026-02', payment_method: '자동이체', memo: '혹한기 난방' },
+      { id: '8', name: '도시가스 요금', category: '고정지출', sub_category: '관리비', payment_day: 12, amount: 82000, month: '2026-02', payment_method: '국민카드', memo: '' },
+      { id: '9', name: '실비+종합건강보험', category: '보험', sub_category: '보험', payment_day: 10, amount: 89000, month: '2026-02', payment_method: '자동이체', memo: '' },
+      { id: '10', name: '운전자보험', category: '보험', sub_category: '보험', payment_day: 10, amount: 23000, month: '2026-02', payment_method: '자동이체', memo: '' },
+      { id: '11', name: '코웨이 정수기 렌탈', category: '고정지출', sub_category: '렌탈', payment_day: 14, amount: 31900, month: '2026-02', payment_method: '현대카드', memo: '' },
+
+      // 2026-01 데이터
+      { id: '1', name: '넷플릭스', category: '구독', sub_category: 'OTT', payment_day: 15, amount: 17000, month: '2026-01', payment_method: '신한카드', memo: '' },
+      { id: '2', name: '유튜브 프리미엄', category: '구독', sub_category: '미디어', payment_day: 21, amount: 14900, month: '2026-01', payment_method: '현대카드', memo: '' },
+      { id: '3', name: '쿠팡 로켓와우', category: '구독', sub_category: '쇼핑', payment_day: 5, amount: 4990, month: '2026-01', payment_method: '국민카드', memo: '' },
+      { id: '5', name: 'SKT 휴대폰 요금', category: '고정지출', sub_category: '통신비', payment_day: 25, amount: 75000, month: '2026-01', payment_method: '자동이체', memo: '' },
+      { id: '6', name: 'SKB 기가인터넷+TV', category: '고정지출', sub_category: '통신비', payment_day: 25, amount: 38500, month: '2026-01', payment_method: '자동이체', memo: '' },
+      { id: '7', name: '아파트 관리비', category: '고정지출', sub_category: '관리비', payment_day: 28, amount: 285000, month: '2026-01', payment_method: '자동이체', memo: '' },
+      { id: '8', name: '도시가스 요금', category: '고정지출', sub_category: '관리비', payment_day: 12, amount: 95000, month: '2026-01', payment_method: '국민카드', memo: '' },
+      { id: '9', name: '실비+종합건강보험', category: '보험', sub_category: '보험', payment_day: 10, amount: 89000, month: '2026-01', payment_method: '자동이체', memo: '' },
+      { id: '10', name: '운전자보험', category: '보험', sub_category: '보험', payment_day: 10, amount: 23000, month: '2026-01', payment_method: '자동이체', memo: '' },
+      { id: '11', name: '코웨이 정수기 렌탈', category: '고정지출', sub_category: '렌탈', payment_day: 14, amount: 31900, month: '2026-01', payment_method: '현대카드', memo: '' },
+    ];
+
+    // ==========================================
+    // 3. 상태 관리
+    // ==========================================
+    let allRecords = [];
+
+    const now = new Date();
+    const previousYearMonth = `${now.getFullYear()}-${String(now.getMonth()).padStart(2,'0')}`;
+
+    let selectedMonth = previousYearMonth;
+    let selectedCategory = 'ALL';
+    let searchQuery = '';
+
+    let trendChartInstance = null;
+    let donutChartInstance = null;
+
+    // ==========================================
+    // 4. 구글 시트 데이터 로드 함수
+    // ==========================================
+    async function loadData() {
+      const badge = document.getElementById('data-status-badge');
+      try {
+        if (!API_KEY || !SPREADSHEET_ID) throw new Error('API 설정 누락');
+        const res = await fetch(sheetUrl);
+        if (!res.ok) throw new Error('구글 시트 응답 실패');
+        const data = await res.json();
+        const rows = data.values || [];
+
+        if (rows.length > 1) {
+          const headers = rows[0];
+          allRecords = rows.slice(1).map(r => {
+            const obj = {};
+            headers.forEach((h, i) => obj[h] = r[i] !== undefined ? String(r[i]).trim() : '');
+            obj.amount = Number(String(obj.amount || 0).replace(/[^0-9.-]/g, '')) || 0;
+            obj.payment_day = Number(obj.payment_day) || 1;
+            return obj;
+          });
+          badge.textContent = '● 구글시트 연동됨';
+          badge.className = 'px-2.5 py-1 text-[11px] font-semibold rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200';
+        } else {
+          throw new Error('시트 데이터 없음');
+        }
+      } catch (err) {
+        console.info('구글 시트 연동 대기중 → 내장 샘플 데이터 모드로 동작합니다.');
+        allRecords = mockExpenseData;
+        badge.textContent = '● 샘플 데이터 모드';
+        badge.className = 'px-2.5 py-1 text-[11px] font-semibold rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200';
+      }
+
+      updateAvailableMonths();
+      renderDashboard();
+    }
+
+    // 사용 가능한 월 목록 업데이트
+    function updateAvailableMonths() {
+      const selectMonth = document.getElementById('select-month');
+      const months = [...new Set(allRecords.map(r => r.month))].filter(Boolean).sort().reverse();
+      if (months.length > 0) {
+        selectMonth.innerHTML = months.map(m => `<option value="${m}" ${m === selectedMonth ? 'selected' : ''}>${m.slice(0,4)}년 ${Number(m.slice(5))}월</option>`).join('');
+        if (!months.includes(selectedMonth)) selectedMonth = months[0];
+      }
+    }
+
+    // ==========================================
+    // 5. 대시보드 메인 렌더링
+    // ==========================================
+    function renderDashboard() {
+      // 1. 현재 월 및 이전 월 데이터 산출
+      const curMonthRecords = allRecords.filter(r => r.month === selectedMonth);
+
+      const [year, mon] = selectedMonth.split('-').map(Number);
+      const prevDate = new Date(year, mon - 2, 1);
+      const prevMonthStr = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, '0')}`;
+      const prevMonthRecords = allRecords.filter(r => r.month === prevMonthStr);
+
+      // 2. KPI 통계 계산 (보험료 카드 분리)
+      const totalAmount = curMonthRecords.reduce((s, r) => s + r.amount, 0);
+      const prevTotalAmount = prevMonthRecords.reduce((s, r) => s + r.amount, 0);
+      const diffAmount = totalAmount - prevTotalAmount;
+
+      const subRecords = curMonthRecords.filter(r => r.category === '구독');
+      const insuranceRecords = curMonthRecords.filter(r => r.category === '보험' || r.sub_category === '보험');
+      const fixedRecords = curMonthRecords.filter(r => r.category !== '구독' && r.category !== '보험' && r.sub_category !== '보험');
+
+      const subAmount = subRecords.reduce((s, r) => s + r.amount, 0);
+      const fixedAmount = fixedRecords.reduce((s, r) => s + r.amount, 0);
+      const insuranceAmount = insuranceRecords.reduce((s, r) => s + r.amount, 0);
+
+      // 7일 이내 결제 예정
+      const todayDay = new Date().getDate();
+      const upcomingRecords = curMonthRecords.filter(r => {
+        const diff = r.payment_day - todayDay;
+        return diff >= 0 && diff <= 7;
+      });
+      const upcomingAmount = upcomingRecords.reduce((s, r) => s + r.amount, 0);
+
+      // 3. KPI 엘리먼트 바인딩
+      document.getElementById('kpi-total-amount').textContent = `${totalAmount.toLocaleString('ko-KR')}원`;
+      const kpiDiffEl = document.getElementById('kpi-total-diff');
+      if (prevMonthRecords.length > 0) {
+        if (diffAmount > 0) {
+          kpiDiffEl.innerHTML = `<span class="text-rose-500 font-bold">▲ +${diffAmount.toLocaleString('ko-KR')}원 증가</span> (전월비)`;
+        } else if (diffAmount < 0) {
+          kpiDiffEl.innerHTML = `<span class="text-emerald-500 font-bold">▼ ${Math.abs(diffAmount).toLocaleString('ko-KR')}원 절감</span> (전월비)`;
+        } else {
+          kpiDiffEl.innerHTML = `<span class="text-slate-500 font-bold">- 변동 없음</span> (전월비)`;
+        }
+      } else {
+        kpiDiffEl.textContent = '이전 달 비교 데이터 없음';
+      }
+
+      document.getElementById('kpi-sub-amount').textContent = `${subAmount.toLocaleString('ko-KR')}원`;
+      document.getElementById('kpi-sub-count').textContent = `${subRecords.length}개 서비스 이용 중`;
+
+      document.getElementById('kpi-fixed-amount').textContent = `${fixedAmount.toLocaleString('ko-KR')}원`;
+      document.getElementById('kpi-fixed-count').textContent = `${fixedRecords.length}개 항목 결제 중`;
+
+      // 🛡️ 보험료 KPI 바인딩
+      document.getElementById('kpi-insurance-amount').textContent = `${insuranceAmount.toLocaleString('ko-KR')}원`;
+      document.getElementById('kpi-insurance-count').textContent = `${insuranceRecords.length}건 가입 중`;
+
+      document.getElementById('kpi-upcoming-amount').textContent = `${upcomingAmount.toLocaleString('ko-KR')}원`;
+      document.getElementById('kpi-upcoming-count').textContent = `${upcomingRecords.length}건 결제 대기`;
+
+      // 4. 차트 렌더링
+      renderTrendChart();
+      renderDonutChart(curMonthRecords);
+
+      // 5. 테이블 렌더링
+      renderTable(curMonthRecords, prevMonthRecords);
+    }
+
+    // ==========================================
+    // 6. 차트: 월별 변화도(3단 스택) 및 카테고리 도넛
+    // ==========================================
+    function renderTrendChart() {
+      const ctx = document.getElementById('monthlyTrendChart')?.getContext('2d');
+      if (!ctx) return;
+
+      const months = [...new Set(allRecords.map(r => r.month))].filter(Boolean).sort();
+
+      const subData = [];
+      const fixedData = [];
+      const insuranceData = [];
+
+      months.forEach(m => {
+        const records = allRecords.filter(r => r.month === m);
+        subData.push(records.filter(r => r.category === '구독').reduce((s, r) => s + r.amount, 0));
+        insuranceData.push(records.filter(r => r.category === '보험' || r.sub_category === '보험').reduce((s, r) => s + r.amount, 0));
+        fixedData.push(records.filter(r => r.category !== '구독' && r.category !== '보험' && r.sub_category !== '보험').reduce((s, r) => s + r.amount, 0));
+      });
+
+      if (trendChartInstance) trendChartInstance.destroy();
+
+      trendChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: months.map(m => `${Number(m.slice(5))}월`),
+          datasets: [
+            { label: '구독 서비스', data: subData, backgroundColor: '#9333ea', borderRadius: 4 },
+            { label: '생활 고정비', data: fixedData, backgroundColor: '#3b82f6', borderRadius: 4 },
+            { label: '보험료', data: insuranceData, backgroundColor: '#10b981', borderRadius: 4 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { stacked: true, grid: { display: false } },
+            y: {
+              stacked: true,
+              ticks: { callback: v => `${(v / 10000).toLocaleString()}만원` }
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: ctx => ` ${ctx.dataset.label}: ${ctx.raw.toLocaleString('ko-KR')}원`
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderDonutChart(curMonthRecords) {
+      const ctx = document.getElementById('categoryDonutChart')?.getContext('2d');
+      if (!ctx) return;
+
+      const catCounts = {};
+      curMonthRecords.forEach(r => {
+        const cat = r.sub_category || r.category || '기타';
+        catCounts[cat] = (catCounts[cat] || 0) + r.amount;
+      });
+
+      const labels = Object.keys(catCounts);
+      const dataValues = Object.values(catCounts);
+
+      if (donutChartInstance) donutChartInstance.destroy();
+
+      donutChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: dataValues,
+            backgroundColor: ['#6366f1', '#a855f7', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ec4899'],
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
+            tooltip: {
+              callbacks: {
+                label: ctx => ` ${ctx.label}: ${ctx.raw.toLocaleString('ko-KR')}원`
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // ==========================================
+    // 7. 테이블 렌더링 및 D-Day / 전월 비교
+    // ==========================================
+    function renderTable(curMonthRecords, prevMonthRecords) {
+      const tbody = document.getElementById('expense-table-body');
+      if (!tbody) return;
+
+      const q = searchQuery.toLowerCase().trim();
+      const filtered = curMonthRecords.filter(r => {
+        const matchCat = selectedCategory === 'ALL'
+          || (selectedCategory === '구독' && r.category === '구독')
+          || (selectedCategory === '보험' && (r.category === '보험' || r.sub_category === '보험'))
+          || (selectedCategory !== '구독' && selectedCategory !== '보험' && (r.sub_category === selectedCategory || r.category === selectedCategory));
+
+        const matchSearch = !q
+          || (r.name || '').toLowerCase().includes(q)
+          || (r.sub_category || '').toLowerCase().includes(q)
+          || (r.payment_method || '').toLowerCase().includes(q)
+          || (r.memo || '').toLowerCase().includes(q);
+
+        return matchCat && matchSearch;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="py-8 text-center text-slate-400">검색 또는 조건에 일치하는 내역이 없습니다.</td></tr>`;
+        return;
+      }
+
+      const todayDay = new Date().getDate();
+
+      tbody.innerHTML = filtered.map(row => {
+        // 전월 동일 항목 찾기
+        const prevRow = prevMonthRecords.find(p => p.name === row.name);
+        const prevAmount = prevRow ? prevRow.amount : null;
+        let diffBadge = '-';
+
+        if (prevAmount !== null) {
+          const diff = row.amount - prevAmount;
+          if (diff > 0) {
+            diffBadge = `<span class="text-rose-600 font-bold">▲ +${diff.toLocaleString('ko-KR')}원</span>`;
+          } else if (diff < 0) {
+            diffBadge = `<span class="text-emerald-600 font-bold">▼ ${Math.abs(diff).toLocaleString('ko-KR')}원</span>`;
+          } else {
+            diffBadge = `<span class="text-slate-400 font-medium">동일</span>`;
+          }
+        }
+
+        // D-Day 계산
+        const dayDiff = row.payment_day - todayDay;
+        let dDayBadge = '';
+        if (dayDiff > 0) {
+          dDayBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-200">D-${dayDiff}</span>`;
+        } else if (dayDiff === 0) {
+          dDayBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500 text-white animate-pulse">D-Day</span>`;
+        } else {
+          dDayBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-400">결제완료</span>`;
+        }
+
+        const isSub = row.category === '구독';
+        const isInsurance = row.category === '보험' || row.sub_category === '보험';
+        let typeBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-700">고정비</span>`;
+        if (isSub) {
+          typeBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-700">구독</span>`;
+        } else if (isInsurance) {
+          typeBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">보험</span>`;
+        }
+
+        return `
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="px-4 py-3 whitespace-nowrap">${typeBadge}</td>
+            <td class="px-4 py-3 whitespace-nowrap font-bold text-slate-900">${row.name}</td>
+            <td class="px-4 py-3 whitespace-nowrap text-slate-600"><span class="px-2 py-0.5 bg-slate-100 rounded text-[11px]">${row.sub_category || '-'}</span></td>
+            <td class="px-4 py-3 whitespace-nowrap text-center">
+              <span class="font-semibold text-slate-700">매월 ${row.payment_day}일</span> ${dDayBadge}
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap text-right text-slate-400 font-medium">${prevAmount !== null ? `${prevAmount.toLocaleString('ko-KR')}원` : '-'}</td>
+            <td class="px-4 py-3 whitespace-nowrap text-right font-extrabold text-slate-900">${row.amount.toLocaleString('ko-KR')}원</td>
+            <td class="px-4 py-3 whitespace-nowrap text-center">${diffBadge}</td>
+            <td class="hidden sm:table-cell px-4 py-3 whitespace-nowrap text-slate-600 text-[11px]">${row.payment_method || '-'}</td>
+            <td class="hidden sm:table-cell px-4 py-3 whitespace-nowrap text-slate-400 text-[11px] truncate max-w-[150px]">${row.memo || '-'}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // ==========================================
+    // 8. 이벤트 바인딩
+    // ==========================================
+    document.getElementById('select-month')?.addEventListener('change', (e) => {
+      selectedMonth = e.target.value;
+      renderDashboard();
+    });
+
+    document.getElementById('btn-refresh')?.addEventListener('click', () => {
+      loadData();
+    });
+
+    document.querySelectorAll('#filter-tabs button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#filter-tabs button').forEach(b => {
+          b.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all cursor-pointer';
+        });
+        btn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-xs transition-all cursor-pointer';
+        selectedCategory = btn.dataset.cat;
+        const curMonthRecords = allRecords.filter(r => r.month === selectedMonth);
+        const [year, mon] = selectedMonth.split('-').map(Number);
+        const prevDate = new Date(year, mon - 2, 1);
+        const prevMonthStr = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, '0')}`;
+        const prevMonthRecords = allRecords.filter(r => r.month === prevMonthStr);
+        renderTable(curMonthRecords, prevMonthRecords);
+      });
+    });
+
+    document.getElementById('input-search')?.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      const curMonthRecords = allRecords.filter(r => r.month === selectedMonth);
+      const [year, mon] = selectedMonth.split('-').map(Number);
+      const prevDate = new Date(year, mon - 2, 1);
+      const prevMonthStr = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, '0')}`;
+      const prevMonthRecords = allRecords.filter(r => r.month === prevMonthStr);
+      renderTable(curMonthRecords, prevMonthRecords);
+    });
+
+    // 시작
+    loadData();
+  </script>
+</body>
+</html>

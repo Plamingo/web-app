@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>비서 - 경조사비 관리 (축의금 / 장례식 비용)</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='85'>💸</text></svg>">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    @font-face { font-family: 'GMarketSans'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansLight.woff') format('woff'); font-weight: 300; font-display: swap; }
+    @font-face { font-family: 'GMarketSans'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff'); font-weight: 500; font-display: swap; }
+    @font-face { font-family: 'GMarketSans'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff') format('woff'); font-weight: 700; font-display: swap; }
+    html { font-family: "GMarketSans"; }
+    body { min-height: 100vh; width: 100%; display: flex; flex-direction: column; background-color: #f8fafc; color: #1e293b; }
+    @media (min-width: 1100px) { body { min-width: 1100px; } }
+    .table-scroll { max-height: 480px; overflow-y: auto; }
+    .table-scroll th { position: sticky; top: 0; z-index: 10; background-color: #f8fafc; box-shadow: inset 0 -1px 0 #e2e8f0; }
+    dialog::backdrop { background-color: rgba(15, 23, 42, 0.5); backdrop-filter: blur(2px); }
+    .fcc { display:flex; align-items: center; justify-content: center; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- ==========================================================================
+       경조사비 뷰 필터 서브 헤더 (최상단 top-0 고정)
+       ========================================================================== -->
+  <div id="sub-header" class="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-xs border-b border-slate-200 px-4 sm:px-8 py-2.5 flex items-center justify-between shadow-xs">
+    <div class="max-w-[1560px] w-full mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-xs font-bold text-slate-700 hidden sm:inline-flex items-center gap-1">
+          <span>📌</span> 경조사비 내역 필터
+        </span>
+        <div id="header-menu-group" class="flex items-center gap-1.5">
+          <button id="btn-view-all" class="px-3 py-1.5 bg-blue-600 text-white rounded-md text-xs font-semibold inline-flex items-center gap-1 cursor-pointer transition-all shadow-xs">
+            📋 전체보기
+          </button>
+          <button id="btn-view-wedding" class="px-3 py-1.5 bg-white hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-md text-xs font-semibold inline-flex items-center gap-1 cursor-pointer transition-all">
+            💐 축의금만
+          </button>
+          <button id="btn-view-funeral" class="px-3 py-1.5 bg-white hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-md text-xs font-semibold inline-flex items-center gap-1 cursor-pointer transition-all">
+            🕯️ 장례식만
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       3. 경조사비 관리 대시보드 화면
+       ========================================================================== -->
+  <main id="dashboard-view" class="max-w-[1580px] w-full mx-auto px-4 sm:px-8 py-4 sm:py-6 pb-16 flex-1">
+    
+    <!-- 상단 종합 요약 KPI 바 -->
+    <div class="bg-white p-0 sm:p-5 rounded-xl shadow-xs border border-slate-200 grid grid-cols-1 md:grid-cols-2 items-center text-center mb-6 gap-3 sm:gap-4 divide-y md:divide-y-0 md:divide-x divide-slate-200">
+      
+      <!-- 1. 축의금 합계 -->
+      <div class="py-1 md:py-0">
+        <div class="text-xs font-semibold text-blue-600 fcc gap-1.5 mb-1">
+          <span>💐</span><span>총 축의금 합계</span>
+        </div>
+        <div id="totalWeddingAmount" class="text-xl sm:text-2xl font-extrabold text-blue-600">0원</div>
+        <div id="totalWeddingCount" class="text-xs text-slate-400 mt-0.5">0명 축하</div>
+      </div>
+
+      <!-- 2. 장례식 비용(부조금) 합계 -->
+      <div class="py-1 md:py-0">
+        <div class="text-xs font-semibold text-slate-600 fcc gap-1.5 mb-1">
+          <span>🕯️</span>
+          <span>총 장례식(부조금) 합계</span>
+        </div>
+        <div id="totalFuneralAmount" class="text-xl sm:text-2xl font-extrabold text-slate-700">0원</div>
+        <div class="flex items-center justify-center mt-1 gap-2">
+          <div id="totalFuneralCount" class="text-xs text-slate-400 mt-0.5">0명 조문</div>
+          <button id="btn-open-expense-detail" type="button" class="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-slate-600 hover:bg-slate-900 text-white text-xs font-semibold cursor-pointer transition-all shadow-xs leading-none" title="경조비 정산 상세내역 보기">
+            <span></span>
+            <span class="inline-flex items-center">📑상세</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1/2 화면 좌우 분할 그리드 -->
+    <div id="split-grid-wrapper" class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      
+      <!-- 좌측 1/2: 축의금 관리 카드 -->
+      <section id="section-wedding" class="bg-white p-4 sm:p-6 rounded-xl shadow-xs border border-slate-200 border-t-4 border-t-blue-600">
+        <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+          <h3 class="text-sm sm:text-base font-bold text-blue-900 flex items-center gap-1.5">
+            <span>💐</span>
+            <span>축의금 내역 (결혼/경사)</span>
+          </h3>
+          <span id="badge-wedding-count" class="text-xs font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-600">
+            0건
+          </span>
+        </div>
+
+        <input type="text" id="searchWeddingInput" placeholder="축의금 검색 (이름, 소속, 메모)..."
+          class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs mb-2.5 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-200 transition-all">
+        <div id="groupWeddingButtons" class="flex items-center gap-1.5 flex-wrap mb-3.5">
+          <!-- 소속 필터 버튼 동적 생성 -->
+        </div>
+
+        <div class="table-scroll overflow-x-hidden sm:overflow-x-auto border border-slate-100 rounded-lg">
+          <table class="w-full border-collapse text-left text-xs">
+            <thead>
+              <tr class="bg-slate-50 text-slate-600 border-b border-slate-200 font-semibold">
+                <th class="hidden sm:table-cell px-3.5 py-2.5 whitespace-nowrap">구분</th>
+                <th class="px-3 py-2.5 whitespace-nowrap">이름</th>
+                <th class="px-3 py-2.5 whitespace-nowrap">소속</th>
+                <th class="px-3 py-2.5 whitespace-nowrap text-right">금액</th>
+                <th class="hidden sm:table-cell px-3.5 py-2.5 whitespace-nowrap text-center">식장참석</th>
+                <th class="hidden sm:table-cell px-3.5 py-2.5 whitespace-nowrap">비고</th>
+              </tr>
+            </thead>
+            <tbody id="weddingTableBody" class="divide-y divide-slate-100 text-slate-700">
+              <!-- JS 동적 렌더링 -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 우측 1/2: 장례식 비용(부조금) 관리 카드 -->
+      <section id="section-funeral" class="bg-white p-4 sm:p-6 rounded-xl shadow-xs border border-slate-200 border-t-4 border-t-slate-600">
+        <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+          <h3 class="text-sm sm:text-base font-bold text-slate-800 flex items-center gap-1.5">
+            <span>🕯️</span>
+            <span>장례식 비용 내역 (조의금/부조금)</span>
+          </h3>
+          <span id="badge-funeral-count" class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
+            0건
+          </span>
+        </div>
+
+        <input type="text" id="searchFuneralInput" placeholder="장례식 부조금 검색 (이름, 소속, 메모)..."
+          class="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs mb-2.5 outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-200 transition-all">
+        <div id="groupFuneralButtons" class="flex items-center gap-1.5 flex-wrap mb-3.5">
+          <!-- 소속 필터 버튼 동적 생성 -->
+        </div>
+
+        <div class="table-scroll overflow-x-hidden sm:overflow-x-auto border border-slate-100 rounded-lg">
+          <table class="w-full border-collapse text-left text-xs">
+            <thead>
+              <tr class="bg-slate-50 text-slate-600 border-b border-slate-200 font-semibold">
+                <th class="hidden sm:table-cell px-3.5 py-2.5 whitespace-nowrap">구분</th>
+                <th class="px-3 py-2.5 whitespace-nowrap">이름</th>
+                <th class="px-3 py-2.5 whitespace-nowrap">소속</th>
+                <th class="px-3 py-2.5 whitespace-nowrap text-right">금액</th>
+                <th class="hidden sm:table-cell px-3.5 py-2.5 whitespace-nowrap text-center">조문여부</th>
+                <th class="hidden sm:table-cell px-3.5 py-2.5 whitespace-nowrap">비고</th>
+              </tr>
+            </thead>
+            <tbody id="funeralTableBody" class="divide-y divide-slate-100 text-slate-700">
+              <!-- JS 동적 렌더링 -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ==========================================================================
+       5. 경조사비 정산 상세내역 모달 다이얼로그 (<dialog>)
+       ========================================================================== -->
+  <dialog id="expenseDetailDialog" class="p-0 rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg m-auto outline-none overflow-hidden">
+    <div class="bg-white flex flex-col max-h-[90vh]">
+      <!-- 모달 헤더 -->
+      <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">📑</span>
+          <div>
+            <h3 class="text-base font-bold">경조사비 정산 상세내역</h3>
+            <p class="text-xs text-slate-300">총 수입 및 장례 관련 실비 지출 내역</p>
+          </div>
+        </div>
+        <button id="btn-close-expense-detail" class="text-slate-400 hover:text-white p-1 text-xl leading-none cursor-pointer transition-colors" title="닫기">&times;</button>
+      </div>
+
+      <!-- 모달 본문 -->
+      <div class="p-5 sm:p-6 overflow-y-auto space-y-4 text-xs sm:text-sm">
+        <!-- 1. 총 경조비 (수입) -->
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-3.5 flex justify-between items-center">
+          <span class="font-bold text-blue-900 flex items-center gap-1.5">
+            <span>💰</span>
+            <span>총 경조비 (수입)</span>
+          </span>
+          <span class="text-base sm:text-lg font-extrabold text-blue-700">30,550,000원</span>
+        </div>
+
+        <!-- 2. 지출 상세 항목 테이블 -->
+        <div class="border border-slate-200 rounded-xl overflow-hidden shadow-xs">
+          <div class="bg-slate-100 px-3.5 py-2 font-bold text-slate-700 text-xs border-b border-slate-200 flex justify-between items-center">
+            <span>지출 항목 및 결제 내역</span>
+            <span>금액</span>
+          </div>
+          <div class="divide-y divide-slate-100 text-slate-800">
+            <div class="p-3 hover:bg-slate-50 flex justify-between items-center">
+              <div>
+                <div class="font-semibold text-slate-900">장례식장비용</div>
+                <div class="text-[11px] text-slate-500 mt-0.5">현금 : 706만원 (4만원 아빠한테)</div>
+              </div>
+              <div class="text-right font-bold text-slate-800 whitespace-nowrap">7,100,000원</div>
+            </div>
+
+            <div class="p-3 hover:bg-slate-50 flex justify-between items-center">
+              <div>
+                <div class="font-semibold text-slate-900">주방이모 1인 인건비</div>
+                <div class="text-[11px] text-slate-500 mt-0.5">현금 : 38.4만원 + 팁</div>
+              </div>
+              <div class="text-right font-bold text-slate-800 whitespace-nowrap">400,000원</div>
+            </div>
+
+            <div class="p-3 hover:bg-slate-50 flex justify-between items-center">
+              <div>
+                <div class="font-semibold text-slate-900">장지비용, 화장비용</div>
+                <div class="text-[11px] text-slate-500 mt-0.5">카드(진성)</div>
+              </div>
+              <div class="text-right font-bold text-slate-800 whitespace-nowrap">1,760,000원</div>
+            </div>
+
+            <div class="p-3 hover:bg-slate-50 flex justify-between items-center">
+              <div>
+                <div class="font-semibold text-slate-900">상조 부담금</div>
+                <div class="text-[11px] text-slate-500 mt-0.5">현금</div>
+              </div>
+              <div class="text-right font-bold text-slate-800 whitespace-nowrap">2,450,000원</div>
+            </div>
+
+            <div class="p-3 hover:bg-slate-50 flex justify-between items-center">
+              <div>
+                <div class="font-semibold text-slate-900">목사님/부목사님 사례비</div>
+                <div class="text-[11px] text-slate-500 mt-0.5">현금</div>
+              </div>
+              <div class="text-right font-bold text-slate-800 whitespace-nowrap">700,000원</div>
+            </div>
+
+            <div class="p-3 hover:bg-slate-50 flex justify-between items-center">
+              <div>
+                <div class="font-semibold text-slate-900">부암교회 떡값</div>
+                <div class="text-[11px] text-slate-400 mt-0.5">현금</div>
+              </div>
+              <div class="text-right font-bold text-slate-800 whitespace-nowrap">300,000원</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. 총 지출 & 잔여금액 요약 -->
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
+          <div class="flex justify-between items-center text-xs font-semibold text-slate-600">
+            <span>총 사용금액 (지출 합계)</span>
+            <span class="text-sm font-bold text-rose-600">12,710,000원</span>
+          </div>
+          <div class="border-t border-slate-200 pt-2 flex justify-between items-center">
+            <span class="text-xs sm:text-sm font-bold text-slate-900">최종 잔여금액</span>
+            <span class="text-base sm:text-lg font-extrabold text-emerald-600">17,840,000원</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 모달 푸터 -->
+      <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+        <button id="btn-footer-close-expense-detail" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold cursor-pointer transition-all">
+          닫기
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ==========================================================================
+       6. 자바스크립트 비즈니스 로직 & Supabase 연동
+       ========================================================================== -->
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    const SUPABASE_URL = 'https://chwnhllugrcwcyaobyzq.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_I3DWIVn7BRGbH6iyYaDMYQ_nnRIzlSG';
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // 1. 상태 및 DOM 캐싱
+    let weddingRecords = [];
+    let funeralRecords = [];
+
+    const dashboardView = document.getElementById('dashboard-view');
+    const subHeader = document.getElementById('sub-header');
+
+    // 테이블 본문
+    const weddingTableBody = document.getElementById('weddingTableBody');
+    const funeralTableBody = document.getElementById('funeralTableBody');
+
+    // 검색창 및 소속(그룹) 필터 버튼 영역
+    const searchWeddingInput = document.getElementById('searchWeddingInput');
+    const searchFuneralInput = document.getElementById('searchFuneralInput');
+    const groupWeddingButtons = document.getElementById('groupWeddingButtons');
+    const groupFuneralButtons = document.getElementById('groupFuneralButtons');
+    let selectedWeddingGroup = '';
+    let selectedFuneralGroup = '';
+
+    // 통계 표시 요소
+    const totalWeddingAmountEl = document.getElementById('totalWeddingAmount');
+    const totalWeddingCountEl = document.getElementById('totalWeddingCount');
+    const badgeWeddingCountEl = document.getElementById('badge-wedding-count');
+
+    const totalFuneralAmountEl = document.getElementById('totalFuneralAmount');
+    const totalFuneralCountEl = document.getElementById('totalFuneralCount');
+    const badgeFuneralCountEl = document.getElementById('badge-funeral-count');
+
+    // 2. 데이터 조회 (Supabase)
+    async function fetchRecords() {
+      try {
+        const { data, error } = await supabaseClient
+          .from('cash_records')
+          .select('*')
+          .order('event_date', { ascending: false });
+
+        let rawData = data || [];
+        weddingRecords = rawData.filter(r => r.category === '축의');
+        funeralRecords = rawData.filter(r => r.category === '조의');
+
+        populateGroupFilters();
+        renderTables();
+        updateStats();
+      } catch (err) {
+        console.error('데이터 로드 실패:', err);
+      }
+    }
+
+    // 4. 테이블 렌더링
+    function renderTables() {
+      renderWeddingTable(weddingRecords);
+      renderFuneralTable(funeralRecords);
+    }
+
+    function renderWeddingTable(records) {
+      if (!weddingTableBody) return;
+      weddingTableBody.innerHTML = '';
+
+      if (records.length === 0) {
+        weddingTableBody.innerHTML = `<tr><td colspan="6" class="text-center text-slate-400 py-6 whitespace-nowrap">축의금 내역이 없습니다.</td></tr>`;
+        return;
+      }
+
+      records.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition-colors';
+        const sideBg = row.side === '신부측' ? 'bg-pink-100 text-pink-700' : 'bg-blue-100 text-blue-700';
+        tr.innerHTML = `
+          <td class="hidden sm:table-cell px-3.5 py-2.5 whitespace-nowrap"><span class="px-2 py-0.5 rounded text-[11px] font-bold ${sideBg}">${escapeHtml(row.side || '신랑측')}</span></td>
+          <td class="px-3 py-2.5 whitespace-nowrap font-bold text-slate-900">${escapeHtml(row.name)}</td>
+          <td class="px-3 py-2.5 whitespace-nowrap text-slate-600 truncate max-w-[90px] sm:max-w-none">${escapeHtml(row.group_name || '-')}</td>
+          <td class="px-3 py-2.5 whitespace-nowrap font-bold text-blue-600 text-right">${Number(row.amount || 0).toLocaleString('ko-KR')}원</td>
+          <td class="hidden sm:table-cell px-3.5 py-2.5 whitespace-nowrap text-center">${row.attendance ? '<span class="text-emerald-600 font-semibold">✅ 참석</span>' : '<span class="text-slate-400">❌ 불참</span>'}</td>
+          <td class="hidden sm:table-cell px-3.5 py-2.5 whitespace-nowrap text-slate-500 text-[11px]">${escapeHtml(row.memo || '-')}</td>
+        `;
+        weddingTableBody.appendChild(tr);
+      });
+    }
+
+    function renderFuneralTable(records) {
+      if (!funeralTableBody) return;
+      funeralTableBody.innerHTML = '';
+
+      if (records.length === 0) {
+        funeralTableBody.innerHTML = `<tr><td colspan="6" class="text-center text-slate-400 py-6 whitespace-nowrap">장례식 부조금 내역이 없습니다.</td></tr>`;
+        return;
+      }
+
+      records.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition-colors';
+        tr.innerHTML = `
+          <td class="hidden sm:table-cell px-3.5 py-2.5 whitespace-nowrap"><span class="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-700">조문</span></td>
+          <td class="px-3 py-2.5 whitespace-nowrap font-bold text-slate-900">${escapeHtml(row.name)}</td>
+          <td class="px-3 py-2.5 whitespace-nowrap text-slate-600 truncate max-w-[90px] sm:max-w-none">${escapeHtml(row.group_name || '-')}</td>
+          <td class="px-3 py-2.5 whitespace-nowrap font-bold text-slate-700 text-right">${Number(row.amount || 0).toLocaleString('ko-KR')}원</td>
+          <td class="hidden sm:table-cell px-3.5 py-2.5 whitespace-nowrap text-center">${row.attendance ? '<span class="text-slate-700 font-semibold">🕯️ 조문</span>' : '<span class="text-slate-400">🕊️ 직접</span>'}</td>
+          <td class="hidden sm:table-cell px-3.5 py-2.5 whitespace-nowrap text-slate-500 text-[11px]">${escapeHtml(row.memo || '-')}</td>
+        `;
+        funeralTableBody.appendChild(tr);
+      });
+    }
+
+    // 5. 통계 집계 및 갱신
+    function updateStats() {
+      const wCount = weddingRecords.length;
+      const wAmount = weddingRecords.reduce((sum, i) => sum + Number(i.amount || 0), 0);
+      const fCount = funeralRecords.length;
+      const fAmount = funeralRecords.reduce((sum, i) => sum + Number(i.amount || 0), 0);
+
+      if (totalWeddingAmountEl) totalWeddingAmountEl.textContent = `${wAmount.toLocaleString('ko-KR')}원`;
+      if (totalWeddingCountEl) totalWeddingCountEl.textContent = `${wCount}명 축하`;
+      if (badgeWeddingCountEl) badgeWeddingCountEl.textContent = `${wCount}건`;
+
+      if (totalFuneralAmountEl) totalFuneralAmountEl.textContent = `${fAmount.toLocaleString('ko-KR')}원`;
+      if (totalFuneralCountEl) totalFuneralCountEl.textContent = `${fCount}명 조문`;
+      if (badgeFuneralCountEl) badgeFuneralCountEl.textContent = `${fCount}건`;
+    }
+
+    // 6. 소속 버튼 필터링
+    function renderWeddingGroupButtons() {
+      if (!groupWeddingButtons) return;
+      groupWeddingButtons.innerHTML = '';
+
+      const groupCounts = {};
+      weddingRecords.forEach(r => {
+        const g = r.group_name || '미지정';
+        groupCounts[g] = (groupCounts[g] || 0) + 1;
+      });
+      const sortedGroups = Object.keys(groupCounts).sort();
+
+      const allBtn = document.createElement('button');
+      const isAllActive = selectedWeddingGroup === '';
+      allBtn.className = isAllActive
+        ? 'px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white shadow-xs transition-all cursor-pointer'
+        : 'px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all cursor-pointer';
+      allBtn.textContent = `전체 (${weddingRecords.length})`;
+      allBtn.onclick = () => {
+        selectedWeddingGroup = '';
+        renderWeddingGroupButtons();
+        applyWeddingFilter();
+      };
+      groupWeddingButtons.appendChild(allBtn);
+
+      sortedGroups.forEach(grp => {
+        const btn = document.createElement('button');
+        const isActive = selectedWeddingGroup === grp;
+        btn.className = isActive
+          ? 'px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white shadow-xs transition-all cursor-pointer'
+          : 'px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all cursor-pointer';
+        btn.textContent = `${grp} (${groupCounts[grp]})`;
+        btn.onclick = () => {
+          selectedWeddingGroup = grp;
+          renderWeddingGroupButtons();
+          applyWeddingFilter();
+        };
+        groupWeddingButtons.appendChild(btn);
+      });
+    }
+
+    function renderFuneralGroupButtons() {
+      if (!groupFuneralButtons) return;
+      groupFuneralButtons.innerHTML = '';
+
+      const groupCounts = {};
+      funeralRecords.forEach(r => {
+        const g = r.group_name || '미지정';
+        groupCounts[g] = (groupCounts[g] || 0) + 1;
+      });
+      const sortedGroups = Object.keys(groupCounts).sort();
+
+      const allBtn = document.createElement('button');
+      const isAllActive = selectedFuneralGroup === '';
+      allBtn.className = isAllActive
+        ? 'px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-800 text-white shadow-xs transition-all cursor-pointer'
+        : 'px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all cursor-pointer';
+      allBtn.textContent = `전체 (${funeralRecords.length})`;
+      allBtn.onclick = () => {
+        selectedFuneralGroup = '';
+        renderFuneralGroupButtons();
+        applyFuneralFilter();
+      };
+      groupFuneralButtons.appendChild(allBtn);
+
+      sortedGroups.forEach(grp => {
+        const btn = document.createElement('button');
+        const isActive = selectedFuneralGroup === grp;
+        btn.className = isActive
+          ? 'px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-800 text-white shadow-xs transition-all cursor-pointer'
+          : 'px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all cursor-pointer';
+        btn.textContent = `${grp} (${groupCounts[grp]})`;
+        btn.onclick = () => {
+          selectedFuneralGroup = grp;
+          renderFuneralGroupButtons();
+          applyFuneralFilter();
+        };
+        groupFuneralButtons.appendChild(btn);
+      });
+    }
+
+    function populateGroupFilters() {
+      renderWeddingGroupButtons();
+      renderFuneralGroupButtons();
+    }
+
+    function applyWeddingFilter() {
+      const q = searchWeddingInput ? searchWeddingInput.value.toLowerCase().trim() : '';
+      const filtered = weddingRecords.filter(r => {
+        const groupVal = r.group_name || '미지정';
+        const matchesGroup = !selectedWeddingGroup || groupVal === selectedWeddingGroup;
+        const matchesSearch = !q || (
+          (r.name || '').toLowerCase().includes(q) ||
+          (r.group_name || '').toLowerCase().includes(q) ||
+          (r.memo || '').toLowerCase().includes(q)
+        );
+        return matchesGroup && matchesSearch;
+      });
+      renderWeddingTable(filtered);
+    }
+
+    function applyFuneralFilter() {
+      const q = searchFuneralInput ? searchFuneralInput.value.toLowerCase().trim() : '';
+      const filtered = funeralRecords.filter(r => {
+        const groupVal = r.group_name || '미지정';
+        const matchesGroup = !selectedFuneralGroup || groupVal === selectedFuneralGroup;
+        const matchesSearch = !q || (
+          (r.name || '').toLowerCase().includes(q) ||
+          (r.group_name || '').toLowerCase().includes(q) ||
+          (r.memo || '').toLowerCase().includes(q)
+        );
+        return matchesGroup && matchesSearch;
+      });
+      renderFuneralTable(filtered);
+    }
+
+    searchWeddingInput?.addEventListener('input', applyWeddingFilter);
+    searchFuneralInput?.addEventListener('input', applyFuneralFilter);
+
+    // 7. 상단 뷰 필터 버튼 (전체 / 축의금만 / 장례식만)
+    const secWedding = document.getElementById('section-wedding');
+    const secFuneral = document.getElementById('section-funeral');
+    const splitGrid = document.getElementById('split-grid-wrapper');
+    const btnAll = document.getElementById('btn-view-all');
+    const btnWed = document.getElementById('btn-view-wedding');
+    const btnFun = document.getElementById('btn-view-funeral');
+
+    function setActiveMenuBtn(activeBtn) {
+      [btnAll, btnWed, btnFun].forEach(b => {
+        b.className = 'px-3 py-1.5 bg-white hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-md text-xs font-semibold inline-flex items-center gap-1 cursor-pointer transition-all';
+      });
+      activeBtn.className = 'px-3 py-1.5 bg-blue-600 text-white rounded-md text-xs font-semibold inline-flex items-center gap-1 cursor-pointer transition-all shadow-xs';
+    }
+
+    btnAll?.addEventListener('click', () => {
+      secWedding.classList.remove('hidden');
+      secFuneral.classList.remove('hidden');
+      splitGrid.className = 'grid grid-cols-1 lg:grid-cols-2 gap-6 items-start';
+      setActiveMenuBtn(btnAll);
+    });
+
+    btnWed?.addEventListener('click', () => {
+      secWedding.classList.remove('hidden');
+      secFuneral.classList.add('hidden');
+      splitGrid.className = 'grid grid-cols-1 gap-6 items-start';
+      setActiveMenuBtn(btnWed);
+    });
+
+    btnFun?.addEventListener('click', () => {
+      secWedding.classList.add('hidden');
+      secFuneral.classList.remove('hidden');
+      splitGrid.className = 'grid grid-cols-1 gap-6 items-start';
+      setActiveMenuBtn(btnFun);
+    });
+
+    // 8. 경조사비 정산 상세 다이얼로그 제어
+    const expenseDetailDialog = document.getElementById('expenseDetailDialog');
+    const btnOpenExpenseDetail = document.getElementById('btn-open-expense-detail');
+    const btnCloseExpenseDetail = document.getElementById('btn-close-expense-detail');
+    const btnFooterCloseExpenseDetail = document.getElementById('btn-footer-close-expense-detail');
+
+    btnOpenExpenseDetail?.addEventListener('click', () => {
+      expenseDetailDialog?.showModal();
+    });
+
+    [btnCloseExpenseDetail, btnFooterCloseExpenseDetail].forEach(btn => {
+      btn?.addEventListener('click', () => {
+        expenseDetailDialog?.close();
+      });
+    });
+
+    expenseDetailDialog?.addEventListener('click', (e) => {
+      if (e.target === expenseDetailDialog) {
+        expenseDetailDialog.close();
+      }
+    });
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return String(text).replace(/[&<>"']/g, (m) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+      })[m]);
+    }
+
+    // 초기 데이터 조회 및 렌더링
+    fetchRecords();
+  </script>
+</body>
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>비서</title>
+    <style>
+      @font-face {font-family: 'GMarketSans';src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansLight.woff') format('woff');font-weight: 300;font-display: swap;}
+      @font-face {font-family: 'GMarketSans';src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff');font-weight: 500;font-display: swap;}
+      @font-face {font-family: 'GMarketSans';src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff') format('woff');font-weight: 700;font-display: swap;}
+      html {font-family: "GMarketSans";}
+    </style>
+  </head>
+  <body>
+    <header class="sticky top-0 z-50 w-full bg-white border-b border-slate-200 py-3.5 px-4 sm:px-8">
+      <div class="max-w-[1560px] mx-auto flex items-center justify-between">
+        <!-- 좌측 로고 -->
+        <a href="./index.html" class="flex items-center cursor-pointer shrink-0 gap-3">
+          <div class="flex items-center justify-center w-10 h-10 rounded-xl shadow-lg shadow-blue-300 hover:scale-105">💼</div>
+          <!-- <div class="flex items-center justify-center w-10 h-10 rounded-xl shadow-lg shadow-blue-300 hover:scale-105 bg-blue-600 text-white font-bold text-lg fcc"></div> -->
+          <span class="text-xl font-bold text-slate-700">개인비서</span>
+        </a>
+        
+        <!-- 중앙 네비게이션 -->
+        <nav class="hidden gap-6 md:flex items-center text-sm font-medium">
+          <a href="/" class="font-bold text-slate-600 hover:text-slate-900">홈</a>
+          <a href="/" class="font-bold text-slate-600 hover:text-slate-900">블로그</a>
+          <a href="/" class="font-bold text-slate-600 hover:text-slate-900">일정</a>
+          <button id="btn-nav-story" type="button" class="flex items-center h-full font-bold text-blue-600 active:border-b-2 active:pb-0.5 hover:text-slate-900 cursor-pointer hidden">일상기록</button>
+          <button id="btn-nav-cash" type="button" class="flex items-center h-full font-bold text-blue-600 active:border-b-2 active:pb-0.5 hover:text-slate-900 cursor-pointer hidden">비용관리</button>
+          <a href="/" class="font-bold text-slate-600 hover:text-slate-900">About</a>
+        </nav>
+
+        <!-- 우측 검색창 및 버튼 구성 -->
+        <div class="flex items-center gap-1.5">
+          <form id="form" class="relative flex items-center">
+            <input id="form_input" type="text" placeholder="통합 검색" class="w-28 focus:w-40 duration-300 py-1.5 pl-3.5 pr-9 bg-slate-100 border border-slate-200 rounded-full text-xs placeholder-slate-400 outline-none focus:ring-1 focus:ring-blue-200">
+            <button type="submit" class="absolute right-3 flex justify-center items-center hover:text-blue-500">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </button>
+          </form>
+          <button class="p-2 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+          </button>
+          <button id="btn-settings" class="p-2 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          </button>
+          <button class="p-2 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+          </button>
+          <div id="header-auth-area" class="flex items-center gap-2"></div>
+        </div>
+      </div>
+    </header>
+
+    <dialog id="auth-code-dialog" class="w-full max-w-xl p-0 m-auto rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="bg-white flex flex-col">
+        <!-- 모달 헤더 -->
+        <div class="flex items-center justify-between px-5 py-4">
+          <div class="flex items-center gap-2">
+            <span class="text-lg">🔐</span>
+            <h3 class="text-sm font-bold">인증코드 설정</h3>
+          </div>
+          <button id="btn-close-dialog" class="text-slate-400 hover:text-slate-900 p-1 text-xl leading-none cursor-pointer transition-colors">&times;</button>
+        </div>
+        <!-- 모달 본문 -->
+        <form id="auth-code-form" class="p-5 space-y-4">
+          <div>
+            <label for="auth-code-input" class="block text-xs font-bold text-slate-700 mb-1.5">인증코드 입력</label>
+            <input type="password" id="auth-code-input" placeholder="인증코드를 입력하세요" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-100 transition-all">
+            <p id="authCodeMessage"></p>
+
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">발급받으신 인증코드를 입력하시면 관리 권한이 활성화됩니다.</p>
+          <div class="flex items-center jusity-end gap-2 pt-2 border-t border-slate-100">
+            <button type="button" id="btn-cancel-auth-dialog" class="px-3.5 py-1.5 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-semibold cursor-pointer transition-all">취소</button>
+            <button type="submit" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold cursor-pointer transition-all shadow-xs">인증확인</button>
+          </div>
+        </form>
+      </div>
+    </dialog>
+    
+    <main class="w-full min-h-[calc(100vh-65px)] bg-slate-50 flex flex-col">
+      <!-- 기본 홈 화면 안내 영역 -->
+      <div id="default-content" class="flex-1 flex flex-col items-center justify-center text-center p-8 text-slate-500">
+        <div class="text-5xl mb-4">💼</div>
+        <h2 class="text-xl font-bold text-slate-800 mb-2">비서 대시보드</h2>
+        <p class="text-sm text-slate-500">상단 메뉴에서 <span class="font-semibold text-blue-600">[경조사비]</span>를 클릭하시면 화면이 열립니다.</p>
+      </div>
+
+      <!-- 경조사비 페이지가 임베드될 iframe -->
+      <iframe id="content-frame" src="./cash_manage2.html" class="hidden w-full flex-1 border-none min-h-[calc(100vh-65px)]" title="컨텐츠 화면"></iframe>
+    </main>
+    
+  </body>
+  <script>
+    async function getAuthCode() {
+      try {
+        const res = await fetch('./config.json');
+        if (!res.ok) throw new Error('config.json 로드 실패')
+        const data= await res.json();
+        return String(data.AUTH_CODE || '').trim();
+      } catch (err) {
+        console.warn('config.json 오류:', err);
+        return null;
+      }
+    }
+
+    const btnSettings = document.getElementById('btn-settings');
+    const btnCloseDialog = document.getElementById('btn-close-dialog');
+    const btnCancelAuthDialog = document.getElementById('btn-cancel-auth-dialog');
+    const authCodeForm = document.getElementById('auth-code-form')
+    const authCodeInput = document.getElementById('auth-code-input');
+    const authCodeDialog = document.getElementById('auth-code-dialog');
+    const authCodeMessage = document.getElementById('authCodeMessage');
+    const btnNavCash = document.getElementById('btn-nav-cash');
+    const btnNavStory = document.getElementById('btn-nav-story');
+    const headerAuthArea = document.getElementById('header-auth-area');
+
+    btnSettings?.addEventListener('click', () => {
+      if (authCodeMessage) authCodeMessage.classList.add('hidden');
+      if (authCodeInput) {
+        authCodeInput.value = localStorage.getItem('auth_code') || '';
+      }
+      authCodeDialog?.showModal();
+      authCodeInput?.focus();
+    })
+
+    // 닫기 및 취소
+    btnCloseDialog?.addEventListener('click', () => authCodeDialog?.close());
+    btnCancelAuthDialog?.addEventListener('click', () => authCodeDialog?.close());
+
+    // 배경 클릭 시 닫기
+    let isMouseDownOnBackdrop = false;
+
+    authCodeDialog?.addEventListener('mousedown', (e) => {
+      isMouseDownOnBackdrop = (e.target === authCodeDialog);
+    })
+    authCodeDialog?.addEventListener('click', (e) => {
+      if (isMouseDownOnBackdrop && e.target === authCodeDialog) authCodeDialog.close();
+    });
+
+    // 인증 확인 제출
+    authCodeForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const inputCode = authCodeInput?.value.trim();
+      if (!inputCode) return;
+      
+      const correctCode = await getAuthCode();
+
+      if (correctCode && inputCode === correctCode) {
+        // 인증 성공
+        localStorage.setItem('auth_code', inputCode);
+        localStorage.setItem('is_authenticated', 'true');
+        // sessionStorage.setItem('auth_code', inputCode);
+        // sessionStorage.setItem('is_authenticated', 'true');
+        // 메뉴 활성화
+        updateMenuAuthState();
+
+        if (authCodeMessage) {
+          authCodeMessage.textContent = '✅ 인증코드가 정상확인되었습니다.';
+          authCodeMessage.className = 'text-[11px] mt-1.5 text-emerald-600 font-semibold';
+          authCodeMessage.classList.remove('hidden');
+        }
+        setTimeout(() => {
+          authCodeDialog?.close();
+        }, 800);
+      } else {
+        // 인증 실패
+        if (authCodeMessage) {
+          authCodeMessage.textContent = correctCode
+          ? '❌ 인증코드가 일치하지 않습니다. 다시 확인해 주세요.' 
+          : '⚠️ config.json 설정을 불러올 수 없습니다.';
+          authCodeMessage.className = 'text-[11px] mt-1.5 text-rose-600 font-semibold';
+          authCodeMessage.classList.remove('hidden');
+        }
+        authCodeInput?.focus();
+        authCodeInput?.select();
+      }
+      
+      
+    })
+
+    function Logout() {
+      localStorage.removeItem('auth_code');
+      localStorage.setItem('is_authenticated', 'false');
+
+      updateMenuAuthState();
+
+      const defaultContent = document.getElementById('default-content');
+      const frame = document.getElementById('content-frame');
+      if (frame) {
+        frame.src= '';
+        frame.classList.add('hidden');
+      }
+      if (defaultContent) {
+        defaultContent.classList.remove('hidden');
+      }
+    }
+
+    function updateMenuAuthState() {
+      const isAuth = localStorage.getItem('is_authenticated') === 'true';
+
+      if (isAuth) {
+        btnNavCash.classList.remove('hidden')
+        btnNavStory.classList.remove('hidden')
+
+        headerAuthArea.innerHTML = `
+          <button id="btn-logout" class="px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs border border-slate-300 text-slate-600 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 rounded-md font-semibold cursor-pointer transition-all">
+            로그아웃
+          </button>
+        `;
+        document.getElementById('btn-logout')?.addEventListener('click', Logout);
+      } else {
+        btnNavCash?.classList.add('hidden');
+        btnNavStory.classList.add('hidden')
+        if (headerAuthArea) {
+          headerAuthArea.innerHTML = '';
+        }
+      }
+    }
+
+    // 네비게이션 버튼 
+    
+    function loadPage(url) {
+      const defaultContent = document.getElementById('default-content');
+      const contentFrame = document.getElementById('content-frame');
+
+      if (defaultContent) defaultContent.classList.add('hidden');
+      if (!contentFrame) return;
+
+      if (contentFrame.getAttribute('data-current-url') === url) {
+        contentFrame.classList.remove('hidden');
+      }
+
+      contentFrame.setAttribute('data-current-url', url);
+      contentFrame.src = url;
+      contentFrame.classList.remove('hidden');
+    }
+    
+    btnNavCash?.addEventListener('click', () => loadPage('./cash_manage2.html'));
+    btnNavStory?.addEventListener('click', () => loadPage('./cash_manage3.html'));
+    updateMenuAuthState();
+
+  </script>
+</html>
