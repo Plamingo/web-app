@@ -95,21 +95,17 @@
     
   </body>
   <script>
-    async function getAuthCode() {
+    async function handelLogin(userAuthCode) {
       try {
-        const res = await fetch('/config');
-        if (!res.ok) throw new Error('config.json 로드 실패')
-        const config = await res.json();
-
-        const authCode = config.AUTH_CODE;
-        const apiKey = config.API_KEY;
-        const spreadsheetId = config.SPREADSHEET_ID;
-
-        return { authCode, apiKey, spreadsheetId };
-      } catch (err) {
-        console.error('에러 발생:', err);
-        return null;
-      }
+        const res = await fetch('/login', {
+          method: 'POST',
+          headers: { 'content-Type': 'application/json;charset=UTF-8'},
+          body: JSON.stringify({ authCode: userAuthCode})
+        });
+        return await res.json();
+    } catch (err) {
+      console.error("로그인 요청 중 에러발생 : ", err);
+      alert("통신 중 오류가 발생하였습니다.");
     }
     
 
@@ -153,9 +149,10 @@
       const inputCode = authCodeInput?.value.trim();
       if (!inputCode) return;
       
-      const env = await getAuthCode();
+      result = handelLogin();
+      console.log(result);
 
-      if (env && inputCode === env.authCode) {
+      if (result.success) {
         // 인증 성공
         localStorage.setItem('auth_code', inputCode);
         localStorage.setItem('is_authenticated', 'true');
