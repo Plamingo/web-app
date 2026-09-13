@@ -175,7 +175,7 @@
       } else {
         // 인증 실패
         if (authCodeMessage) {
-          authCodeMessage.textContent = correctCode
+          authCodeMessage.textContent = env.authCode
           ? '❌ 인증코드가 일치하지 않습니다. 다시 확인해 주세요.' 
           : '⚠️ config.json 설정을 불러올 수 없습니다.';
           authCodeMessage.className = 'text-[11px] mt-1.5 text-rose-600 font-semibold';
