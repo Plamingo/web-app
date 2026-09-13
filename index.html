@@ -149,7 +149,7 @@
       const inputCode = authCodeInput?.value.trim();
       if (!inputCode) return;
       
-      result = handelLogin(inputCode);
+      result = await handelLogin(inputCode);
       console.log(result);
 
       if (result.success) {
