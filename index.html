@@ -105,12 +105,13 @@
         const apiKey = config.API_KEY;
         const spreadsheetId = config.SPREADSHEET_ID;
 
-        console.log('가져온 환경변수 확인:', { authCode, apiKey, spreadsheetId });
+        return { authCode, apiKey, spreadsheetId };
       } catch (err) {
         console.error('에러 발생:', err);
+        return null;
       }
     }
-    getAuthCode();
+    
 
     const btnSettings = document.getElementById('btn-settings');
     const btnCloseDialog = document.getElementById('btn-close-dialog');
@@ -152,9 +153,9 @@
       const inputCode = authCodeInput?.value.trim();
       if (!inputCode) return;
       
-      getAuthCode();
+      const env = await getAuthCode();
 
-      if (authCode && inputCode === authCode) {
+      if (env && inputCode === env.authCode) {
         // 인증 성공
         localStorage.setItem('auth_code', inputCode);
         localStorage.setItem('is_authenticated', 'true');
