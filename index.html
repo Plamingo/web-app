@@ -97,13 +97,17 @@
   <script>
     async function getAuthCode() {
       try {
-        const res = await fetch('./config.json');
+        const res = await fetch('/config');
         if (!res.ok) throw new Error('config.json 로드 실패')
-        const data= await res.json();
-        return String(data.AUTH_CODE || '').trim();
+        const config = await res.json();
+
+        const authCode = config.SUPABASE_URL;
+        const apiKey = config.SUPABASE_ANON_KEY;
+        const spreadsheetId = config.MAP_API;
+
+        console.log('가져온 환경변수 확인:', { authCode, apiKey, spreadsheetId });
       } catch (err) {
-        console.warn('config.json 오류:', err);
-        return null;
+        console.error('에러 발생:', err);
       }
     }
 
@@ -147,9 +151,9 @@
       const inputCode = authCodeInput?.value.trim();
       if (!inputCode) return;
       
-      const correctCode = await getAuthCode();
+      getAuthCode();
 
-      if (correctCode && inputCode === correctCode) {
+      if (authCode && inputCode === authCode) {
         // 인증 성공
         localStorage.setItem('auth_code', inputCode);
         localStorage.setItem('is_authenticated', 'true');
