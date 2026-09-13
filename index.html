@@ -103,11 +103,11 @@
           body: JSON.stringify({ authCode: userAuthCode})
         });
         return await res.json();
-    } catch (err) {
-      console.error("로그인 요청 중 에러발생 : ", err);
-      alert("통신 중 오류가 발생하였습니다.");
+      } catch (err) {
+        console.error("로그인 요청 중 에러발생 : ", err);
+        alert("통신 중 오류가 발생하였습니다.");
+      }
     }
-    
 
     const btnSettings = document.getElementById('btn-settings');
     const btnCloseDialog = document.getElementById('btn-close-dialog');
