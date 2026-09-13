@@ -5,9 +5,9 @@ export async function onRequest(context) {
 
   // 클라이언트에 전달할 환경변수 데이터 객체 구성
   const configData = {
-    AUTH_CODE: AUTH_CODE || "",
-    API_KEY: API_KEY || "",
-    SPREADSHEET_ID: SPREADSHEET_ID || "",
+    AUTH_CODE: AUTH_CODE,
+    API_KEY: API_KEY,
+    SPREADSHEET_ID: SPREADSHEET_ID,
   };
 
   // JSON 형식으로 응답 반환
