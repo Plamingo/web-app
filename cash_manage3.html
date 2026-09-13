@@ -220,7 +220,7 @@
         const apiKey = config.API_KEY;
         const spreadsheetId = config.SPREADSHEET_ID;
 
-        return { authCode, apiKey, spreadsheetId };
+        return { apiKey, spreadsheetId };
       } catch (err) {
         console.error('에러 발생:', err);
         return null;
