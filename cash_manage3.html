@@ -204,10 +204,10 @@
     async function getConfig() {
       try {
         const res = await fetch('./config.json');
-        if (!res.ok) throw new Error('config.json 로드 실패');
+        if (!res.ok) return null;
         return await res.json();
       } catch (err) {
-        console.warn('config.json 로드 실패');
+        // console.warn('config.json 로드 실패');
         return null;
       }
     }
