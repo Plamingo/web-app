@@ -20,7 +20,7 @@
           <img src="./images/logo_white.png" alt="로고" class="w-10 h-10 rounded-xl object-cover shadow-lg shadow-blue-300 hover:scale-105 transition-transform">
           <!-- <div class="flex items-center justify-center w-10 h-10 rounded-xl shadow-lg shadow-blue-300 hover:scale-105">💼</div> -->
           <!-- <div class="flex items-center justify-center w-10 h-10 rounded-xl shadow-lg shadow-blue-300 hover:scale-105 bg-blue-600 text-white font-bold text-lg fcc"></div> -->
-          <span class="text-xl font-bold text-slate-700">개인비서</span>
+          <span class="text-base font-bold text-slate-700">개인비서</span>
         </a>
         
         <!-- 중앙 네비게이션 -->
@@ -35,8 +35,8 @@
 
         <!-- 우측 검색창 및 버튼 구성 -->
         <div class="flex items-center gap-1.5">
-          <form id="form" class="relative flex items-center">
-            <input id="form_input" type="text" placeholder="통합 검색" class="w-28 focus:w-40 duration-300 py-1.5 pl-3.5 pr-9 bg-slate-100 border border-slate-200 rounded-full text-base placeholder-slate-400 outline-none focus:ring-1 focus:ring-blue-200">
+          <form id="form" class="hidden relative sm:flex items-center">
+            <input id="form_input" type="text" placeholder="통합 검색" class="w-28 focus:w-40 duration-300 py-1.5 pl-3.5 pr-9 bg-slate-100 border border-slate-200 rounded-full text-xs placeholder-slate-400 outline-none focus:ring-1 focus:ring-blue-200">
             <button type="submit" class="absolute right-3 flex justify-center items-center hover:text-blue-500">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </button>
@@ -69,7 +69,7 @@
         <form id="auth-code-form" class="p-5 space-y-4">
           <div>
             <label for="auth-code-input" class="block text-xs font-bold text-slate-700 mb-1.5">인증코드 입력</label>
-            <input type="password" id="auth-code-input" placeholder="인증코드를 입력하세요" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-base outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-100 transition-all">
+            <input type="password" id="auth-code-input" placeholder="인증코드를 입력하세요" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-base sm:text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-100 transition-all">
             <p id="authCodeMessage"></p>
 
           </div>
