@@ -200,26 +200,36 @@
     // ==========================================
     // 1. 설정 로드 및 Google Sheets API 설정
     // ==========================================
-    // async function getConfig(key) {
-    //   try {
-    //     const res = await fetch('./config.json');
-    //     if (!res.ok) throw new Error('config.json 로드 실패');
-    //     const data = await res.json();
-    //     return String(data[key] || '').trim();
-    //   } catch (err) {
-    //     console.warn('config.json 로드 실패, 기본값/샘플 모드로 동작합니다.');
-    //     return null;
-    //   }
-    // }
+    let localConfig = null;
+    async function getConfig() {
+      try {
+        const res = await fetch('./config.json');
+        if (!res.ok) throw new Error('config.json 로드 실패');
+        return await res.json();
+      } catch (err) {
+        console.warn('config.json 로드 실패');
+        return null;
+      }
+    }
+    // 초기 실행시 config.json 로드 시도 
+    (async () => {
+      localConfig = await getConfig();
+    })();
+
     async function getAuthCode() {
+      if (!localConfig) localConfig = await getConfig();
+      // config.json 로컬파일 존재
+      if (localConfig && localConfig.API_KEY && localConfig.SPREADSHEET_ID) {
+        const apiKey = localConfig.API_KEY;
+        const spreadsheetId = localConfig.SPREADSHEET_ID;
+        return { apiKey, spreadsheetId };
+      }
       try {
         const res = await fetch('/config');
         if (!res.ok) throw new Error('config.json 로드 실패')
         const config = await res.json();
-
         const apiKey = config.API_KEY;
         const spreadsheetId = config.SPREADSHEET_ID;
-
         return { apiKey, spreadsheetId };
       } catch (err) {
         console.error('에러 발생:', err);
@@ -232,7 +242,7 @@
     // 'Subscription' 시트 우선 조회, 실패 시 기본 시트
     const RANGE = "Subscription!A:I";
     const sheetUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.spreadsheetId}/values/${RANGE}?key=${env.apiKey}`;
-
+    console.log(sheetUrl)
     // ==========================================
     // 2. 현실적인 기본 샘플 데이터 (폴백 및 시연용)
     // ==========================================
