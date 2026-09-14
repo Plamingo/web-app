@@ -242,7 +242,6 @@
     // 'Subscription' 시트 우선 조회, 실패 시 기본 시트
     const RANGE = "Subscription!A:I";
     const sheetUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.spreadsheetId}/values/${RANGE}?key=${env.apiKey}`;
-    console.log(sheetUrl)
     // ==========================================
     // 2. 현실적인 기본 샘플 데이터 (폴백 및 시연용)
     // ==========================================
