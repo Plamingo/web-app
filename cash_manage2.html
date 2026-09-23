@@ -270,10 +270,43 @@
        6. 자바스크립트 비즈니스 로직 & Supabase 연동
        ========================================================================== -->
   <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-    const SUPABASE_URL = 'https://chwnhllugrcwcyaobyzq.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_I3DWIVn7BRGbH6iyYaDMYQ_nnRIzlSG';
-    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // 데이터 로드 
+    let localConfig = null;
+    async function getAuthCode() {
+      // 1. 캐시된 데이터 확인, config.json 로드 시도
+      if (!localConfig) {
+        try {
+          const res = await fetch('./config.json')
+          if (res.ok) localConfig = await res.json();
+        } catch {
+          // 로컬파일이 없는 경우, 에러 무시
+        }
+      }
+      
+      // 2. 로컬 설정파일 값 확인
+      if (localConfig?.API_KEY && localConfig?.SPREADSHEET_ID) {
+        return { 
+          apiKey: localConfig.API_KEY,
+          spreadsheetId: localConfig.SPREADSHEET_ID,
+        };
+      }
+
+      // 3. 로컬파일 없는경우 서버요청
+      try {
+        const res = await fetch('/config');
+        if (!res.ok) throw new Error('config.json 로드 실패')
+
+        const config = await res.json();
+        return { apiKey: config.API_KEY, spreadsheetId: config.SPREADSHEET_ID };
+      } catch (err) {
+        console.error('인증정보 오류:', err);
+        return null;
+      }
+    }
+
+    const env = await getAuthCode();
+    const RANGE = "경조금관리!A:I";
+    const sheetUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.spreadsheetId}/values/${RANGE}?key=${env.apiKey}`;
 
     // 1. 상태 및 DOM 캐싱
     let weddingRecords = [];
@@ -306,14 +339,35 @@
     // 2. 데이터 조회 (Supabase)
     async function fetchRecords() {
       try {
-        const { data, error } = await supabaseClient
-          .from('cash_records')
-          .select('*')
-          .order('event_date', { ascending: false });
+        if (!env?.apiKey || !env?.spreadsheetId) throw new Error('API 설정 누락');
+        const res = await fetch(sheetUrl);
+        if (!res.ok) throw new Error('구글 시트 응답 실패');
+        const data = await res.json();
+        const rows = data.values || [];
 
-        let rawData = data || [];
-        weddingRecords = rawData.filter(r => r.category === '축의');
-        funeralRecords = rawData.filter(r => r.category === '조의');
+        if (rows.length > 1) {
+          const headers = rows[0].map(h => String(h).trim());
+          const rawData = rows.slice(1).map(r => {
+            const obj = {};
+            headers.forEach((h, i) => {
+              obj[h] = r[i] !== undefined ? String(r[i]).trim() : '';
+            });
+            
+            // 금액 정제: 쉼표 등 제거 후 정수 변환
+            obj.amount = Number(String(obj.amount || 0).replace(/[^0-9.-]/g, '')) || 0;
+            
+            // 참석 여부 정제: TRUE, 참석 등의 값을 불리언으로 변환
+            obj.attendance = String(obj.attendance).toUpperCase() === 'TRUE' || obj.
+attendance === '참석';
+            return obj;
+          });
+          // 카테고리별(축의 / 조의) 데이터 필터링 분리
+          weddingRecords = rawData.filter(r => r.category === '축의');
+          funeralRecords = rawData.filter(r => r.category === '조의');
+        } else {
+          weddingRecords = [];
+          funeralRecords = [];
+        }
 
         populateGroupFilters();
         renderTables();
