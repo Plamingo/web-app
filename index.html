@@ -6,70 +6,48 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>404 Not Found | Cloudflare</title>
 
-  <!-- GMarketSans 웹폰트 로드 -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansLight.css">
+  <!-- Tailwind CSS v4 브라우저 CDN 로드 -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'media',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['GmarketSansMedium', 'GmarketSans', 'sans-serif'],
-            light: ['GmarketSansLight', 'sans-serif'],
-            bold: ['GmarketSansBold', 'sans-serif']
-          },
-          colors: {
-            cfOrange: '#f38020',
-            cfOrangeHover: '#d96e14',
-            cfBlue: '#0051c3'
-          }
-        }
-      }
-    };
-  </script>
-
-  <!-- CSS 코드는 대괄호 { } 기준으로 한 줄로 작성 -->
+  <!-- 웹폰트 및 기본 스타일: 브라우저 즉시 렌더링 지원 (대괄호 { } 기준 한 줄 작성) -->
   <style>
-    @font-face { font-family: 'GmarketSans'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff'); font-weight: 500; font-style: normal; }
-    body { font-family: 'GmarketSansMedium', 'GmarketSans', -apple-system, BlinkMacSystemFont, sans-serif; }
+    @font-face { font-family: 'GMarketSans'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansLight.woff') format('woff'); font-weight: 300; font-display: swap; }
+    @font-face { font-family: 'GMarketSans'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff'); font-weight: 500; font-display: swap; }
+    @font-face { font-family: 'GMarketSans'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff') format('woff'); font-weight: 700; font-display: swap; }
+    body { font-family: 'GMarketSans', -apple-system, BlinkMacSystemFont, sans-serif; }
   </style>
 </head>
-<body class="bg-[#f7f7f8] dark:bg-[#171717] text-[#313131] dark:text-[#e8e8e8] min-h-screen flex flex-col justify-between p-4 md:p-8 transition-colors duration-150">
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col justify-between p-4 md:p-8 transition-colors duration-150">
 
   <main class="w-full max-w-[960px] mx-auto flex-1">
-    <!-- Header Section -->
-    <header class="mb-8 pb-6 border-b border-[#dedede] dark:border-[#383838]">
-      <div class="inline-flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.5px] text-[#e03131] mb-2">
-        <span class="w-2 h-2 rounded-full bg-[#e03131]"></span>
+    <!-- 상단 헤더 영역: 에러 상태 및 기본 메시지 -->
+    <header class="mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
+      <div class="inline-flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.5px] text-rose-600 dark:text-rose-400 mb-2">
+        <span class="w-2 h-2 rounded-full bg-rose-600 dark:bg-rose-500"></span>
         <span>Error 404</span>
       </div>
-      <h1 class="text-[32px] font-semibold text-[#313131] dark:text-[#e8e8e8] mb-1.5 leading-tight">
+      <h1 class="text-[32px] font-semibold text-slate-900 dark:text-white mb-1.5 leading-tight">
         Page Not Found
       </h1>
-      <p class="text-base text-[#656565] dark:text-[#ababab]">
+      <p class="text-base text-slate-600 dark:text-slate-400">
         The requested URL was not found on this server.
       </p>
     </header>
 
-    <!-- 3-Node Architecture Status Diagram (Cloudflare Style) -->
-    <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10" aria-label="Connection Status">
-      <!-- Node 1: Browser -->
-      <div class="bg-white dark:bg-[#222222] border border-[#dedede] dark:border-[#383838] rounded-lg p-6 text-center flex flex-col items-center shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-        <div class="w-14 h-14 rounded-full flex items-center justify-center mb-3.5 bg-black/[0.04] dark:bg-white/[0.06]">
-          <svg class="w-7 h-7 stroke-[#313131] dark:stroke-[#e8e8e8] fill-none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+    <!-- 3단계 네트워크 진단 다이어그램 (브라우저 - Cloudflare - 오리진 서버) -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10" aria-label="네트워크 연결 상태">
+      <!-- 노드 1: 사용자 브라우저 (클라이언트 정상) -->
+      <div class="bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 rounded-xl p-6 text-center flex flex-col items-center shadow-sm">
+        <div class="w-14 h-14 rounded-full flex items-center justify-center mb-3.5 bg-slate-100 dark:bg-slate-700/60">
+          <svg class="w-7 h-7 stroke-slate-800 dark:stroke-slate-200 fill-none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
             <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
             <line x1="8" y1="21" x2="16" y2="21"></line>
             <line x1="12" y1="17" x2="12" y2="21"></line>
           </svg>
         </div>
-        <div class="text-base font-semibold text-[#313131] dark:text-[#e8e8e8] mb-1">Browser</div>
-        <div class="text-[13px] text-[#888888] dark:text-[#777777] mb-3">You</div>
-        <div class="inline-flex items-center gap-1.5 text-[13px] font-semibold py-1 px-3 rounded-full bg-[#2f9e44]/[0.12] text-[#2f9e44]">
+        <div class="text-base font-semibold text-slate-900 dark:text-white mb-1">Browser</div>
+        <div class="text-[13px] text-slate-500 dark:text-slate-400 mb-3">You</div>
+        <div class="inline-flex items-center gap-1.5 text-[13px] font-semibold py-1 px-3 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60">
           <svg class="w-3.5 h-3.5 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
@@ -77,16 +55,16 @@
         </div>
       </div>
 
-      <!-- Node 2: Cloudflare CDN / Edge -->
-      <div class="bg-white dark:bg-[#222222] border border-[#dedede] dark:border-[#383838] rounded-lg p-6 text-center flex flex-col items-center shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-        <div class="w-14 h-14 rounded-full flex items-center justify-center mb-3.5 bg-black/[0.04] dark:bg-white/[0.06]">
-          <svg class="w-7 h-7 stroke-[#313131] dark:stroke-[#e8e8e8] fill-none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+      <!-- 노드 2: Cloudflare 엣지 네트워크 (CDN 프록시 정상) -->
+      <div class="bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 rounded-xl p-6 text-center flex flex-col items-center shadow-sm">
+        <div class="w-14 h-14 rounded-full flex items-center justify-center mb-3.5 bg-slate-100 dark:bg-slate-700/60">
+          <svg class="w-7 h-7 stroke-slate-800 dark:stroke-slate-200 fill-none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
           </svg>
         </div>
-        <div class="text-base font-semibold text-[#313131] dark:text-[#e8e8e8] mb-1">Cloudflare</div>
-        <div class="text-[13px] text-[#888888] dark:text-[#777777] mb-3" id="cf-edge-location">Edge Network</div>
-        <div class="inline-flex items-center gap-1.5 text-[13px] font-semibold py-1 px-3 rounded-full bg-[#2f9e44]/[0.12] text-[#2f9e44]">
+        <div class="text-base font-semibold text-slate-900 dark:text-white mb-1">Cloudflare</div>
+        <div class="text-[13px] text-slate-500 dark:text-slate-400 mb-3" id="cf-edge-location">Edge Network</div>
+        <div class="inline-flex items-center gap-1.5 text-[13px] font-semibold py-1 px-3 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60">
           <svg class="w-3.5 h-3.5 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
@@ -94,19 +72,19 @@
         </div>
       </div>
 
-      <!-- Node 3: Origin Host / Server -->
-      <div class="bg-white dark:bg-[#222222] border border-[#dedede] dark:border-[#383838] rounded-lg p-6 text-center flex flex-col items-center shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
-        <div class="w-14 h-14 rounded-full flex items-center justify-center mb-3.5 bg-black/[0.04] dark:bg-white/[0.06]">
-          <svg class="w-7 h-7 stroke-[#e03131] fill-none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+      <!-- 노드 3: 오리진 호스트 서버 (웹 서버 404 오류) -->
+      <div class="bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 rounded-xl p-6 text-center flex flex-col items-center shadow-sm">
+        <div class="w-14 h-14 rounded-full flex items-center justify-center mb-3.5 bg-rose-50 dark:bg-rose-950/40">
+          <svg class="w-7 h-7 stroke-rose-600 dark:stroke-rose-400 fill-none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
             <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
             <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
             <line x1="6" y1="6" x2="6.01" y2="6"></line>
             <line x1="6" y1="18" x2="6.01" y2="18"></line>
           </svg>
         </div>
-        <div class="text-base font-semibold text-[#313131] dark:text-[#e8e8e8] mb-1" id="host-name">Host</div>
-        <div class="text-[13px] text-[#888888] dark:text-[#777777] mb-3">Origin Server</div>
-        <div class="inline-flex items-center gap-1.5 text-[13px] font-semibold py-1 px-3 rounded-full bg-[#e03131]/[0.12] text-[#e03131]">
+        <div class="text-base font-semibold text-slate-900 dark:text-white mb-1" id="host-name">Host</div>
+        <div class="text-[13px] text-slate-500 dark:text-slate-400 mb-3">Origin Server</div>
+        <div class="inline-flex items-center gap-1.5 text-[13px] font-semibold py-1 px-3 rounded-full bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200/80 dark:border-rose-800/60">
           <svg class="w-3.5 h-3.5 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -116,20 +94,20 @@
       </div>
     </section>
 
-    <!-- Details / Trouble-shooting section -->
+    <!-- 상세 진단 및 문제 해결 가이드 영역 -->
     <section class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-9">
       <div>
-        <h3 class="text-lg font-semibold text-[#313131] dark:text-[#e8e8e8] mb-3">What happened?</h3>
-        <p class="text-sm text-[#656565] dark:text-[#ababab] mb-3 leading-relaxed">
+        <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-3">What happened?</h3>
+        <p class="text-sm text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">
           요청하신 페이지가 서버에 존재하지 않습니다. URL이 잘못 입력되었거나 페이지가 삭제 또는 이동되었을 수 있습니다.
         </p>
-        <p class="text-sm text-[#656565] dark:text-[#ababab] leading-relaxed">
-          The origin server returned a <strong class="font-bold">404 (Not Found)</strong> status code. The resource you are looking for might have been removed, had its name changed, or is temporarily unavailable.
+        <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+          The origin server returned a <strong class="font-bold text-slate-800 dark:text-slate-200">404 (Not Found)</strong> status code. The resource you are looking for might have been removed, had its name changed, or is temporarily unavailable.
         </p>
       </div>
       <div>
-        <h3 class="text-lg font-semibold text-[#313131] dark:text-[#e8e8e8] mb-3">What can I do?</h3>
-        <ul class="list-disc pl-5 text-sm text-[#656565] dark:text-[#ababab] space-y-1.5 leading-relaxed">
+        <h3 class="text-lg font-semibold text-slate-900 dark:text-white mb-3">What can I do?</h3>
+        <ul class="list-disc pl-5 text-sm text-slate-600 dark:text-slate-400 space-y-1.5 leading-relaxed">
           <li>주소창의 URL 경로 및 철자가 올바른지 확인해 주세요.</li>
           <li>이전 페이지로 돌아가거나 웹사이트 메인 페이지로 이동해 보세요.</li>
           <li>사이트 관리자라면 라우팅 설정, 파일 경로 또는 빌드 설정을 확인하십시오.</li>
@@ -137,53 +115,67 @@
       </div>
     </section>
 
-    <!-- Navigation actions -->
-    <!-- <div class="flex flex-wrap gap-3 mb-10">
-      <a href="/" class="inline-flex items-center justify-center gap-2 py-2.5 px-5 rounded-md text-sm font-medium text-white bg-cfOrange hover:bg-cfOrangeHover transition-colors border border-transparent cursor-pointer">
+    <!-- 네비게이션 액션 버튼 영역 -->
+    <div class="flex flex-wrap gap-3 mb-10">
+      <a href="/" class="inline-flex items-center justify-center gap-2 py-2.5 px-5 rounded-lg text-sm font-medium text-white bg-[#f38020] hover:bg-[#d96e14] transition-colors border border-transparent cursor-pointer shadow-sm">
         홈페이지로 이동 (Home)
       </a>
-      <button type="button" onclick="history.back()" class="inline-flex items-center justify-center gap-2 py-2.5 px-5 rounded-md text-sm font-medium bg-white dark:bg-[#222222] border border-[#dedede] dark:border-[#383838] text-[#313131] dark:text-[#e8e8e8] hover:bg-black/[0.05] dark:hover:bg-white/[0.05] transition-colors cursor-pointer">
+      <button type="button" onclick="history.back()" class="inline-flex items-center justify-center gap-2 py-2.5 px-5 rounded-lg text-sm font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors cursor-pointer shadow-sm">
         이전 페이지 (Go Back)
       </button>
-    </div> -->
+    </div>
   </main>
 
-  <!-- Footer -->
-  <footer class="w-full max-w-[960px] mx-auto border-t border-[#dedede] dark:border-[#383838] pt-6 mt-auto text-xs text-[#888888] dark:text-[#777777] flex flex-col gap-3">
+  <!-- 하단 푸터 영역: Ray ID, IP, 브랜딩 및 타임스탬프 -->
+  <footer class="w-full max-w-[960px] mx-auto border-t border-slate-200 dark:border-slate-800 pt-6 mt-auto text-xs text-slate-500 dark:text-slate-400 flex flex-col gap-3">
     <div class="flex flex-wrap justify-between items-center gap-3">
       <div class="flex flex-wrap gap-2 items-center font-mono">
-        <span>Cloudflare Ray ID: <strong id="ray-id" class="text-[#313131] dark:text-[#e8e8e8]">8f921ab4cd7e098a</strong></span>
+        <span>Cloudflare Ray ID: <strong id="ray-id" class="text-slate-800 dark:text-slate-200">8f921ab4cd7e098a</strong></span>
         <span>•</span>
-        <span>Your IP: <span id="client-ip" class="cursor-pointer">Click to reveal</span></span>
+        <span>Your IP: <span id="client-ip" class="cursor-pointer hover:text-slate-800 dark:hover:text-slate-200 underline">Click to reveal</span></span>
         <span>•</span>
-        <button class="bg-transparent border-0 text-cfBlue cursor-pointer text-xs underline p-0 hover:opacity-80" id="copy-btn" onclick="copyRayId()">Copy Ray ID</button>
+        <button class="bg-transparent border-0 text-[#0051c3] cursor-pointer text-xs underline p-0 hover:opacity-80" id="copy-btn" onclick="copyRayId()">Copy Ray ID</button>
       </div>
-      <div class="inline-flex items-center gap-1.5 text-[#656565] dark:text-[#ababab] font-medium">
-        <svg class="w-6 h-4 fill-cfOrange" viewBox="0 0 40 25">
+      <div class="inline-flex items-center gap-1.5 text-slate-600 dark:text-slate-400 font-medium">
+        <svg class="w-6 h-4 fill-[#f38020]" viewBox="0 0 40 25">
           <path d="M29.5 8.2c-.8-4.5-4.8-7.9-9.5-7.9-4.2 0-7.8 2.7-9.1 6.5C10.3 6.7 9.7 6.6 9 6.6 4 6.6 0 10.6 0 15.6s4 9 9 9h20.5c5.8 0 10.5-4.7 10.5-10.5 0-5.4-4.1-9.9-9.5-10.4v-.5z"/>
         </svg>
         <span>Performance &amp; security by Cloudflare</span>
       </div>
     </div>
-    <div class="flex flex-wrap justify-between items-center gap-3">
+    <div class="flex flex-wrap justify-between items-center gap-3 text-slate-400 dark:text-slate-500">
       <small>© 2026 Cloudflare, Inc. All rights reserved.</small>
       <small id="timestamp-utc"></small>
     </div>
   </footer>
 
+  <!-- 클라이언트 측 동적 데이터 처리 스크립트 -->
   <script>
-    // Hostname 자동 반영
+    /**
+     * 1. 접속 호스트명(Hostname) 동적 반영
+     * - 현재 사용자가 접속한 도메인(window.location.hostname)을 오리진 서버 카드에 자동 표시합니다.
+     * - 로컬 파일(file://)로 직접 실행하여 도메인이 비어있는 경우 기본값 'example.com'을 사용합니다.
+     */
     const currentHost = window.location.hostname || "example.com";
     const hostEl = document.getElementById("host-name");
     if (hostEl) hostEl.textContent = currentHost;
 
-    // UTC 타임스탬프 설정
+    /**
+     * 2. 서버 기준 UTC 타임스탬프 설정
+     * - 오류 발생 시점을 기록하기 위해 현재 클라이언트 시간을 국제 표준시(UTC) 형식 문자열로 변환합니다.
+     * - 하단 푸터의 #timestamp-utc 엘리먼트에 출력합니다.
+     */
     const now = new Date();
     const utcString = now.toUTCString();
     const timeEl = document.getElementById("timestamp-utc");
     if (timeEl) timeEl.textContent = utcString;
 
-    // 랜덤 Cloudflare Ray ID 생성기
+    /**
+     * 3. 가상 Cloudflare Ray ID 생성 함수
+     * - Cloudflare의 Ray ID 규격(16자리 16진수 소문자)과 동일한 난수를 생성합니다.
+     * - 정적 테스트 환경에서도 실제 오류 화면과 동일한 형태의 식별자를 시뮬레이션합니다.
+     * @returns {string} 16자리의 무작위 16진수 문자열 (예: "8f921ab4cd7e098a")
+     */
     function generateRayId() {
       const hex = "0123456789abcdef";
       let id = "";
@@ -193,11 +185,16 @@
       return id;
     }
 
+    // 생성된 Ray ID를 화면의 #ray-id 엘리먼트에 적용
     const rayEl = document.getElementById("ray-id");
     const generatedId = generateRayId();
     if (rayEl) rayEl.textContent = generatedId;
 
-    // Ray ID 복사 기능
+    /**
+     * 4. Ray ID 클립보드 원클릭 복사 기능
+     * - 웹 표준 Clipboard API(navigator.clipboard.writeText)를 호출하여 화면의 Ray ID를 복사합니다.
+     * - 복사 성공 시 사용자가 인지할 수 있도록 버튼 문구를 2초간 "Copied!"로 변경 후 원상 복구합니다.
+     */
     function copyRayId() {
       const text = rayEl ? rayEl.textContent : generatedId;
       navigator.clipboard.writeText(text).then(() => {
@@ -206,10 +203,16 @@
           copyBtn.textContent = "Copied!";
           setTimeout(() => { copyBtn.textContent = "Copy Ray ID"; }, 2000);
         }
-      }).catch(() => {});
+      }).catch((err) => {
+        console.error("클립보드 복사 실패:", err);
+      });
     }
 
-    // IP 클릭 시 더미 IP 노출
+    /**
+     * 5. 클라이언트 IP 보호 및 클릭 시 확인 기능
+     * - 개인정보 보호를 위해 초기 상태에서는 마스킹(Click to reveal)되어 있습니다.
+     * - 사용자가 해당 텍스트를 클릭했을 때 로컬 더미 IP 주소("127.0.0.1 (Hidden)")를 노출합니다.
+     */
     const ipEl = document.getElementById("client-ip");
     if (ipEl) {
       ipEl.style.cursor = "pointer";
