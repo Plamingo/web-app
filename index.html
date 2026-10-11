@@ -1,293 +1,222 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <title>비서</title>
-    <style>
-      @font-face {font-family: 'GMarketSans';src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansLight.woff') format('woff');font-weight: 300;font-display: swap;}
-      @font-face {font-family: 'GMarketSans';src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff');font-weight: 500;font-display: swap;}
-      @font-face {font-family: 'GMarketSans';src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff') format('woff');font-weight: 700;font-display: swap;}
-      html {font-family: "GMarketSans";}
-    </style>
-  </head>
-  <body class="h-screen overflow-hidden">
-    <header class="sticky top-0 z-50 w-full bg-white border-b border-slate-200 py-3.5 px-4 sm:px-8">
-      <div class="max-w-[1560px] mx-auto flex items-center justify-between">
-        <!-- 좌측 로고 -->
-        <a href="./index.html" class="flex items-center cursor-pointer shrink-0 gap-3">
-          <img src="./images/logo_white.png" alt="로고" class="w-10 h-10 rounded-xl object-cover shadow-lg shadow-blue-300 hover:scale-105 transition-transform">
-          <!-- <div class="flex items-center justify-center w-10 h-10 rounded-xl shadow-lg shadow-blue-300 hover:scale-105">💼</div> -->
-          <!-- <div class="flex items-center justify-center w-10 h-10 rounded-xl shadow-lg shadow-blue-300 hover:scale-105 bg-blue-600 text-white font-bold text-lg fcc"></div> -->
-          <span class="text-base font-bold text-slate-700">개인비서</span>
-        </a>
-        
-        <!-- 중앙 네비게이션 -->
-        <nav class="hidden gap-6 md:flex items-center text-sm font-medium">
-          <a href="/" class="font-bold text-slate-600 hover:text-slate-900">홈</a>
-          <a href="/" class="font-bold text-slate-600 hover:text-slate-900">블로그</a>
-          <a href="/" class="font-bold text-slate-600 hover:text-slate-900">일정</a>
-          <button id="btn-nav-story" type="button" class="flex items-center h-full font-bold text-blue-600 active:border-b-2 active:pb-0.5 hover:text-slate-900 cursor-pointer hidden">일상기록</button>
-          <button id="btn-nav-cash" type="button" class="flex items-center h-full font-bold text-blue-600 active:border-b-2 active:pb-0.5 hover:text-slate-900 cursor-pointer hidden">비용관리</button>
-          <a href="/" class="font-bold text-slate-600 hover:text-slate-900">About</a>
-        </nav>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>404 Not Found | Cloudflare</title>
 
-        <!-- 우측 검색창 및 버튼 구성 -->
-        <div class="flex items-center gap-1.5">
-          <form id="form" class="hidden relative sm:flex items-center">
-            <input id="form_input" type="text" placeholder="통합 검색" class="w-28 focus:w-40 duration-300 py-1.5 pl-3.5 pr-9 bg-slate-100 border border-slate-200 rounded-full text-xs placeholder-slate-400 outline-none focus:ring-1 focus:ring-blue-200">
-            <button type="submit" class="absolute right-3 flex justify-center items-center hover:text-blue-500">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            </button>
-          </form>
-          <button class="p-2 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-          </button>
-          <button id="btn-settings" class="p-2 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors focus:outline-none">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-          </button>
-          <button class="p-2 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-          </button>
-          <div id="header-auth-area" class="flex items-center gap-2"></div>
-        </div>
-      </div>
-    </header>
-    <nav class="mobile-nav fixed inset-x-3 z-40 border backdrop-blur-lg bottom-1.5 p-1.5 rounded-xl sm:hidden">
-      <div class="mobile-nav-inner mx-auto grid grid-cols-3 gap-1">
-        <button id="btn-mobile-nav-home" type="button" class="flex items-center justify-center min-h-12 rounded-full text-base font-bold text-blue-600 active:border-b-2 active:pb-0.5 hover:text-slate-900 hover:shadow-lg cursor-pointer">홈</button>
-        <button id="btn-mobile-nav-story" type="button" class="flex items-center justify-center min-h-12 rounded-full text-base font-bold text-blue-600 active:border-b-2 active:pb-0.5 hover:text-slate-900 hover:shadow-lg cursor-pointer">일상기록</button>
-        <button id="btn-mobile-nav-cash" type="button" class="flex items-center justify-center min-h-12 rounded-full text-base font-bold text-blue-600 active:border-b-2 active:pb-0.5 hover:text-slate-900 hover:shadow-lg cursor-pointer">비용관리</button>
-        <!-- <a href="/" class="flex flex-col min-h-12 items-center justify-center gap-1 rounded-md text-[11px] font-bold">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house h-[22px] w-[22px]" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
-          <span>홈</span></a>
-        <a href="/" class="flex flex-col min-h-12 items-center justify-center gap-1 rounded-md text-[11px] font-bold">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flame h-[22px] w-[22px]" aria-hidden="true"><path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4"></path></svg>
-          <span>일상기록</span></a>
-        <a href="/" class="flex flex-col min-h-12 items-center justify-center gap-1 rounded-md text-[11px] font-bold">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart h-[22px] w-[22px]" aria-hidden="true"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"></path></svg>
-          <span>비용관리</span></a> -->
-      </div>
-    </nav>
-    <dialog id="auth-code-dialog" class="w-full max-w-xs sm:max-w-xl p-0 m-auto rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
-      <div class="bg-white flex flex-col">
-        <!-- 모달 헤더 -->
-        <div class="flex items-center justify-between px-5 py-4">
-          <div class="flex items-center gap-2">
-            <span class="text-lg">🔐</span>
-            <h3 class="text-sm font-bold">인증코드 설정</h3>
-          </div>
-          <button id="btn-close-dialog" class="text-slate-400 hover:text-slate-900 p-1 text-xl leading-none cursor-pointer transition-colors">&times;</button>
-        </div>
-        <!-- 모달 본문 -->
-        <form id="auth-code-form" class="p-5 space-y-4">
-          <div>
-            <label for="auth-code-input" class="block text-xs font-bold text-slate-700 mb-1.5">인증코드 입력</label>
-            <input type="password" id="auth-code-input" placeholder="인증코드를 입력하세요" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-base sm:text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-100 transition-all">
-            <p id="authCodeMessage"></p>
+  <!-- GMarketSans 웹폰트 로드 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansLight.css">
 
-          </div>
-          <p class="text-[11px] text-slate-400 leading-relaxed">발급받으신 인증코드를 입력하시면 관리 권한이 활성화됩니다.</p>
-          <div class="flex items-center jusity-end gap-2 pt-2 border-t border-slate-100">
-            <button type="button" id="btn-cancel-auth-dialog" class="px-3.5 py-1.5 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-semibold cursor-pointer transition-all">취소</button>
-            <button type="submit" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold cursor-pointer transition-all shadow-xs">인증확인</button>
-          </div>
-        </form>
-      </div>
-    </dialog>
-    
-    <main class="w-full min-h-[calc(100vh-65px)] bg-slate-50 flex flex-col">
-      <!-- 기본 홈 화면 안내 영역 -->
-      <div id="default-content" class="flex-1 flex flex-col items-center justify-center text-center p-8 text-slate-500">
-        <div class="text-5xl mb-4">💼</div>
-        <h2 class="text-xl font-bold text-slate-800 mb-2">비서 대시보드</h2>
-        <p class="text-sm text-slate-500">승인된 코드를 입력 후<span class="font-semibold text-blue-600">[메뉴]</span>를 클릭하시면 화면이 열립니다.</p>
-      </div>
-
-      <!-- 페이지가 임베드될 iframe -->
-      <iframe id="content-frame" class="hidden w-full flex-1 border-none min-h-[calc(100vh-65px)]" title="컨텐츠 화면"></iframe>
-    </main>
-    
-  </body>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    let localConfig = null;
-
-    async function getConfig() {
-      try {
-        const res = await fetch('./config.json');
-        if (!res.ok) return null;
-        
-        return await res.json();
-      } catch (err) {
-        // console.error("❌ 로컬 환경변수 파일을 읽을 수 없습니다:", err)
-        return null;
-      }
-    }
-
-    // 초기 실행시 config.json 로드 시도 
-    (async () => {
-      localConfig = await getConfig();
-    })();
-
-    async function handelLogin(userAuthCode) {
-      if (!localConfig) localConfig = await getConfig();
-      // config.json 로컬파일 존재
-      if (localConfig && localConfig.AUTH_CODE) {
-        return {success: userAuthCode === localConfig.AUTH_CODE};
-      } 
-      try {
-        const res = await fetch('/login', {
-          method: 'POST',
-          headers: { 'content-Type': 'application/json;charset=UTF-8'},
-          body: JSON.stringify({ authCode: userAuthCode})
-        });
-        return await res.json();
-      } catch (err) {
-        console.error("로그인 요청 중 에러발생 : ", err);
-        alert("통신 중 오류가 발생하였습니다.");
-      }
-    }
-
-    const btnSettings = document.getElementById('btn-settings');
-    const btnCloseDialog = document.getElementById('btn-close-dialog');
-    const btnCancelAuthDialog = document.getElementById('btn-cancel-auth-dialog');
-    const authCodeForm = document.getElementById('auth-code-form')
-    const authCodeInput = document.getElementById('auth-code-input');
-    const authCodeDialog = document.getElementById('auth-code-dialog');
-    const authCodeMessage = document.getElementById('authCodeMessage');
-    const btnNavCash = document.getElementById('btn-nav-cash');
-    const btnNavStory = document.getElementById('btn-nav-story');
-    const btnMobileStory = document.getElementById('btn-mobile-nav-story');
-    const btnMobileCash = document.getElementById('btn-mobile-nav-cash');
-    const headerAuthArea = document.getElementById('header-auth-area');
-
-    btnSettings?.addEventListener('click', () => {
-      if (authCodeMessage) authCodeMessage.classList.add('hidden');
-      if (authCodeInput) {
-        authCodeInput.value = localStorage.getItem('auth_code') || '';
-      }
-      authCodeDialog?.showModal();
-      authCodeInput?.focus();
-    })
-
-    // 닫기 및 취소
-    btnCloseDialog?.addEventListener('click', () => authCodeDialog?.close());
-    btnCancelAuthDialog?.addEventListener('click', () => authCodeDialog?.close());
-
-    // 배경 클릭 시 닫기
-    let isMouseDownOnBackdrop = false;
-
-    authCodeDialog?.addEventListener('mousedown', (e) => {
-      isMouseDownOnBackdrop = (e.target === authCodeDialog);
-    })
-    authCodeDialog?.addEventListener('click', (e) => {
-      if (isMouseDownOnBackdrop && e.target === authCodeDialog) authCodeDialog.close();
-    });
-
-    // 인증 확인 제출
-    authCodeForm?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const inputCode = authCodeInput?.value.trim();
-      if (!inputCode) return;
-      
-      result = await handelLogin(inputCode);
-      console.log(result);
-
-      if (result.success) {
-        // 인증 성공
-        localStorage.setItem('auth_code', inputCode);
-        localStorage.setItem('is_authenticated', 'true');
-        // sessionStorage.setItem('auth_code', inputCode);
-        // sessionStorage.setItem('is_authenticated', 'true');
-        // 메뉴 활성화
-        updateMenuAuthState();
-
-        if (authCodeMessage) {
-          authCodeMessage.textContent = '✅ 인증코드가 정상확인되었습니다.';
-          authCodeMessage.className = 'text-[11px] mt-1.5 text-emerald-600 font-semibold';
-          authCodeMessage.classList.remove('hidden');
-        }
-        setTimeout(() => {
-          authCodeDialog?.close();
-        }, 800);
-      } else {
-        // 인증 실패
-        if (authCodeMessage) {
-          authCodeMessage.textContent = '❌ 인증코드가 일치하지 않습니다. 다시 확인해 주세요.'
-          authCodeMessage.className = 'text-[11px] mt-1.5 text-rose-600 font-semibold';
-          authCodeMessage.classList.remove('hidden');
-        }
-        authCodeInput?.focus();
-        authCodeInput?.select();
-      }
-      
-      
-    })
-
-    function Logout() {
-      localStorage.removeItem('auth_code');
-      localStorage.setItem('is_authenticated', 'false');
-
-      updateMenuAuthState();
-
-      const defaultContent = document.getElementById('default-content');
-      const frame = document.getElementById('content-frame');
-      if (frame) {
-        frame.src= '';
-        frame.classList.add('hidden');
-      }
-      if (defaultContent) {
-        defaultContent.classList.remove('hidden');
-      }
-    }
-
-    function updateMenuAuthState() {
-      const isAuth = localStorage.getItem('is_authenticated') === 'true';
-
-      if (isAuth) {
-        btnNavCash.classList.remove('hidden')
-        btnNavStory.classList.remove('hidden')
-
-        headerAuthArea.innerHTML = `
-          <button id="btn-logout" class="px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs border border-slate-300 text-slate-600 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 rounded-md font-semibold cursor-pointer transition-all">
-            로그아웃
-          </button>
-        `;
-        document.getElementById('btn-logout')?.addEventListener('click', Logout);
-      } else {
-        btnNavCash?.classList.add('hidden');
-        btnNavStory.classList.add('hidden')
-        if (headerAuthArea) {
-          headerAuthArea.innerHTML = '';
+    tailwind.config = {
+      darkMode: 'media',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['GmarketSansMedium', 'GmarketSans', 'sans-serif'],
+            light: ['GmarketSansLight', 'sans-serif'],
+            bold: ['GmarketSansBold', 'sans-serif']
+          },
+          colors: {
+            cfOrange: '#f38020',
+            cfOrangeHover: '#d96e14',
+            cfBlue: '#0051c3'
+          }
         }
       }
-    }
-
-    // 네비게이션 버튼 
-    
-    function loadPage(url) {
-      const defaultContent = document.getElementById('default-content');
-      const contentFrame = document.getElementById('content-frame');
-
-      if (defaultContent) defaultContent.classList.add('hidden');
-      if (!contentFrame) return;
-
-      if (contentFrame.getAttribute('data-current-url') === url) {
-        contentFrame.classList.remove('hidden');
-      }
-
-      contentFrame.setAttribute('data-current-url', url);
-      contentFrame.src = url;
-      contentFrame.classList.remove('hidden');
-    }
-    
-    btnNavCash?.addEventListener('click', () => loadPage('./cash_manage2.html'));
-    btnNavStory?.addEventListener('click', () => loadPage('./cash_manage3.html'));
-    // 모바일 일상기록 / 비용관리 이동
-    btnMobileStory?.addEventListener('click', () => loadPage('./cash_manage3.html'));
-    btnMobileCash?.addEventListener('click', () => loadPage('./cash_manage2.html'));
-    updateMenuAuthState();
-
+    };
   </script>
+
+  <!-- CSS 코드는 대괄호 { } 기준으로 한 줄로 작성 -->
+  <style>
+    @font-face { font-family: 'GmarketSans'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff'); font-weight: 500; font-style: normal; }
+    body { font-family: 'GmarketSansMedium', 'GmarketSans', -apple-system, BlinkMacSystemFont, sans-serif; }
+  </style>
+</head>
+<body class="bg-[#f7f7f8] dark:bg-[#171717] text-[#313131] dark:text-[#e8e8e8] min-h-screen flex flex-col justify-between p-4 md:p-8 transition-colors duration-150">
+
+  <main class="w-full max-w-[960px] mx-auto flex-1">
+    <!-- Header Section -->
+    <header class="mb-8 pb-6 border-b border-[#dedede] dark:border-[#383838]">
+      <div class="inline-flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.5px] text-[#e03131] mb-2">
+        <span class="w-2 h-2 rounded-full bg-[#e03131]"></span>
+        <span>Error 404</span>
+      </div>
+      <h1 class="text-[32px] font-semibold text-[#313131] dark:text-[#e8e8e8] mb-1.5 leading-tight">
+        Page Not Found
+      </h1>
+      <p class="text-base text-[#656565] dark:text-[#ababab]">
+        The requested URL was not found on this server.
+      </p>
+    </header>
+
+    <!-- 3-Node Architecture Status Diagram (Cloudflare Style) -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10" aria-label="Connection Status">
+      <!-- Node 1: Browser -->
+      <div class="bg-white dark:bg-[#222222] border border-[#dedede] dark:border-[#383838] rounded-lg p-6 text-center flex flex-col items-center shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+        <div class="w-14 h-14 rounded-full flex items-center justify-center mb-3.5 bg-black/[0.04] dark:bg-white/[0.06]">
+          <svg class="w-7 h-7 stroke-[#313131] dark:stroke-[#e8e8e8] fill-none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+          </svg>
+        </div>
+        <div class="text-base font-semibold text-[#313131] dark:text-[#e8e8e8] mb-1">Browser</div>
+        <div class="text-[13px] text-[#888888] dark:text-[#777777] mb-3">You</div>
+        <div class="inline-flex items-center gap-1.5 text-[13px] font-semibold py-1 px-3 rounded-full bg-[#2f9e44]/[0.12] text-[#2f9e44]">
+          <svg class="w-3.5 h-3.5 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span>Working</span>
+        </div>
+      </div>
+
+      <!-- Node 2: Cloudflare CDN / Edge -->
+      <div class="bg-white dark:bg-[#222222] border border-[#dedede] dark:border-[#383838] rounded-lg p-6 text-center flex flex-col items-center shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+        <div class="w-14 h-14 rounded-full flex items-center justify-center mb-3.5 bg-black/[0.04] dark:bg-white/[0.06]">
+          <svg class="w-7 h-7 stroke-[#313131] dark:stroke-[#e8e8e8] fill-none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+          </svg>
+        </div>
+        <div class="text-base font-semibold text-[#313131] dark:text-[#e8e8e8] mb-1">Cloudflare</div>
+        <div class="text-[13px] text-[#888888] dark:text-[#777777] mb-3" id="cf-edge-location">Edge Network</div>
+        <div class="inline-flex items-center gap-1.5 text-[13px] font-semibold py-1 px-3 rounded-full bg-[#2f9e44]/[0.12] text-[#2f9e44]">
+          <svg class="w-3.5 h-3.5 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span>Working</span>
+        </div>
+      </div>
+
+      <!-- Node 3: Origin Host / Server -->
+      <div class="bg-white dark:bg-[#222222] border border-[#dedede] dark:border-[#383838] rounded-lg p-6 text-center flex flex-col items-center shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+        <div class="w-14 h-14 rounded-full flex items-center justify-center mb-3.5 bg-black/[0.04] dark:bg-white/[0.06]">
+          <svg class="w-7 h-7 stroke-[#e03131] fill-none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+            <line x1="6" y1="6" x2="6.01" y2="6"></line>
+            <line x1="6" y1="18" x2="6.01" y2="18"></line>
+          </svg>
+        </div>
+        <div class="text-base font-semibold text-[#313131] dark:text-[#e8e8e8] mb-1" id="host-name">Host</div>
+        <div class="text-[13px] text-[#888888] dark:text-[#777777] mb-3">Origin Server</div>
+        <div class="inline-flex items-center gap-1.5 text-[13px] font-semibold py-1 px-3 rounded-full bg-[#e03131]/[0.12] text-[#e03131]">
+          <svg class="w-3.5 h-3.5 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+          <span>Error (404)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Details / Trouble-shooting section -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-9">
+      <div>
+        <h3 class="text-lg font-semibold text-[#313131] dark:text-[#e8e8e8] mb-3">What happened?</h3>
+        <p class="text-sm text-[#656565] dark:text-[#ababab] mb-3 leading-relaxed">
+          요청하신 페이지가 서버에 존재하지 않습니다. URL이 잘못 입력되었거나 페이지가 삭제 또는 이동되었을 수 있습니다.
+        </p>
+        <p class="text-sm text-[#656565] dark:text-[#ababab] leading-relaxed">
+          The origin server returned a <strong class="font-bold">404 (Not Found)</strong> status code. The resource you are looking for might have been removed, had its name changed, or is temporarily unavailable.
+        </p>
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold text-[#313131] dark:text-[#e8e8e8] mb-3">What can I do?</h3>
+        <ul class="list-disc pl-5 text-sm text-[#656565] dark:text-[#ababab] space-y-1.5 leading-relaxed">
+          <li>주소창의 URL 경로 및 철자가 올바른지 확인해 주세요.</li>
+          <li>이전 페이지로 돌아가거나 웹사이트 메인 페이지로 이동해 보세요.</li>
+          <li>사이트 관리자라면 라우팅 설정, 파일 경로 또는 빌드 설정을 확인하십시오.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Navigation actions -->
+    <!-- <div class="flex flex-wrap gap-3 mb-10">
+      <a href="/" class="inline-flex items-center justify-center gap-2 py-2.5 px-5 rounded-md text-sm font-medium text-white bg-cfOrange hover:bg-cfOrangeHover transition-colors border border-transparent cursor-pointer">
+        홈페이지로 이동 (Home)
+      </a>
+      <button type="button" onclick="history.back()" class="inline-flex items-center justify-center gap-2 py-2.5 px-5 rounded-md text-sm font-medium bg-white dark:bg-[#222222] border border-[#dedede] dark:border-[#383838] text-[#313131] dark:text-[#e8e8e8] hover:bg-black/[0.05] dark:hover:bg-white/[0.05] transition-colors cursor-pointer">
+        이전 페이지 (Go Back)
+      </button>
+    </div> -->
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full max-w-[960px] mx-auto border-t border-[#dedede] dark:border-[#383838] pt-6 mt-auto text-xs text-[#888888] dark:text-[#777777] flex flex-col gap-3">
+    <div class="flex flex-wrap justify-between items-center gap-3">
+      <div class="flex flex-wrap gap-2 items-center font-mono">
+        <span>Cloudflare Ray ID: <strong id="ray-id" class="text-[#313131] dark:text-[#e8e8e8]">8f921ab4cd7e098a</strong></span>
+        <span>•</span>
+        <span>Your IP: <span id="client-ip" class="cursor-pointer">Click to reveal</span></span>
+        <span>•</span>
+        <button class="bg-transparent border-0 text-cfBlue cursor-pointer text-xs underline p-0 hover:opacity-80" id="copy-btn" onclick="copyRayId()">Copy Ray ID</button>
+      </div>
+      <div class="inline-flex items-center gap-1.5 text-[#656565] dark:text-[#ababab] font-medium">
+        <svg class="w-6 h-4 fill-cfOrange" viewBox="0 0 40 25">
+          <path d="M29.5 8.2c-.8-4.5-4.8-7.9-9.5-7.9-4.2 0-7.8 2.7-9.1 6.5C10.3 6.7 9.7 6.6 9 6.6 4 6.6 0 10.6 0 15.6s4 9 9 9h20.5c5.8 0 10.5-4.7 10.5-10.5 0-5.4-4.1-9.9-9.5-10.4v-.5z"/>
+        </svg>
+        <span>Performance &amp; security by Cloudflare</span>
+      </div>
+    </div>
+    <div class="flex flex-wrap justify-between items-center gap-3">
+      <small>© 2026 Cloudflare, Inc. All rights reserved.</small>
+      <small id="timestamp-utc"></small>
+    </div>
+  </footer>
+
+  <script>
+    // Hostname 자동 반영
+    const currentHost = window.location.hostname || "example.com";
+    const hostEl = document.getElementById("host-name");
+    if (hostEl) hostEl.textContent = currentHost;
+
+    // UTC 타임스탬프 설정
+    const now = new Date();
+    const utcString = now.toUTCString();
+    const timeEl = document.getElementById("timestamp-utc");
+    if (timeEl) timeEl.textContent = utcString;
+
+    // 랜덤 Cloudflare Ray ID 생성기
+    function generateRayId() {
+      const hex = "0123456789abcdef";
+      let id = "";
+      for (let i = 0; i < 16; i++) {
+        id += hex[Math.floor(Math.random() * hex.length)];
+      }
+      return id;
+    }
+
+    const rayEl = document.getElementById("ray-id");
+    const generatedId = generateRayId();
+    if (rayEl) rayEl.textContent = generatedId;
+
+    // Ray ID 복사 기능
+    function copyRayId() {
+      const text = rayEl ? rayEl.textContent : generatedId;
+      navigator.clipboard.writeText(text).then(() => {
+        const copyBtn = document.getElementById("copy-btn");
+        if (copyBtn) {
+          copyBtn.textContent = "Copied!";
+          setTimeout(() => { copyBtn.textContent = "Copy Ray ID"; }, 2000);
+        }
+      }).catch(() => {});
+    }
+
+    // IP 클릭 시 더미 IP 노출
+    const ipEl = document.getElementById("client-ip");
+    if (ipEl) {
+      ipEl.style.cursor = "pointer";
+      ipEl.addEventListener("click", () => {
+        ipEl.textContent = "127.0.0.1 (Hidden)";
+      });
+    }
+  </script>
+</body>
 </html>
