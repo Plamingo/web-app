@@ -7,6 +7,7 @@ export async function onRequest(context) {
     JSON.stringify({
       API_KEY: API_KEY,
       SPREADSHEET_ID: SPREADSHEET_ID,
+      targetPath: TARGET_PAGE,
     }),
     {
       headers: {

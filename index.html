@@ -193,14 +193,27 @@
         return {success: false};
       }
 
-      // 2. 로컬 config.json 없으면 서버에 요청
+      // 2. 로컬 config.json 없으면 서버에 요청 - 로그인
       try {
         const res = await fetch('/login', {
           method: 'POST',
           headers: {'content-type': 'application/json; charset=UTF-8'},
           body: JSON.stringify({authCode: userAuthCode})
         });
-        return await res.json();
+        const loginData = await res.json();
+
+        // config 환경변수 추가 
+        if (loginData && loginData.success) {
+          try {
+            const configRes = await fetch('/config');
+            if (!configRes.ok) return;
+            const configData = await configRes.json();
+            loginData.targetPath = configData.targetPath;
+          } catch (configErr) {
+            console.error('/config 로드 오류', configErr)
+          }
+          return loginData;
+        }
       } catch (err) {
         console.error("error occured", err);
         alert("통신 중 오류 발생하였습니다.");
