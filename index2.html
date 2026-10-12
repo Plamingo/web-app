@@ -70,32 +70,31 @@
           <span>비용관리</span></a> -->
       </div>
     </nav>
-    <dialog id="auth-code-dialog" class="w-full max-w-xs sm:max-w-xl p-0 m-auto rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
-      <div class="bg-white flex flex-col">
-        <!-- 모달 헤더 -->
-        <div class="flex items-center justify-between px-5 py-4">
-          <div class="flex items-center gap-2">
-            <span class="text-lg">🔐</span>
-            <div class="text-sm font-bold">사용자 인증</div>
-          </div>
-          <button id="btn-close-dialog" class="text-slate-400 hover:text-slate-900 p-1 text-xl leading-none cursor-pointer transition-colors">&times;</button>
+    
+    <div id="auth-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden" aria-modal="true" role="dialog">
+      <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-2xl max-w-sm w-full mx-auto transform transition-all">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+            <span>관리자 인증</span>
+          </h3>
+          <button type="button" id="auth-close-btn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xl leading-none cursor-pointer p-1">&times;</button>
         </div>
-        <!-- 모달 본문 -->
-        <form id="auth-code-form" class="p-5 space-y-4">
-          <div>
-            <label for="auth-code-input" class="block text-xs font-bold text-slate-700 mb-1.5">인증코드 입력</label>
-            <input type="password" id="auth-code-input" placeholder="인증코드를 입력하세요" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-base sm:text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-100 transition-all">
-            <p id="authCodeMessage"></p>
-
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
+          시스템 접근을 위해 보안 인증코드를 입력해 주세요.
+        </p>
+        <form id="auth-form" onsubmit="return false;">
+          <div class="mb-3">
+            <input type="password" id="auth-code-input" autocomplete="off" placeholder="인증코드를 입력하세요" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500 transition-all">
+            <p id="auth-error-msg" class="text-xs text-rose-500 mt-2 hidden">인증코드가 올바르지 않습니다.</p>
           </div>
-          <p class="text-[11px] text-slate-400 leading-relaxed">발급받으신 인증코드를 입력하시면 관리 권한이 활성화됩니다.</p>
-          <div class="flex items-center jusity-end gap-2 pt-2 border-t border-slate-100">
-            <button type="button" id="btn-cancel-auth-dialog" class="px-3.5 py-1.5 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-semibold cursor-pointer transition-all">취소</button>
-            <button type="submit" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold cursor-pointer transition-all shadow-xs">인증확인</button>
+          <div class="flex items-center justify-end gap-2 mt-5">
+            <button type="button" id="auth-cancel-btn" class="px-4 py-2 text-xs font-medium rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer">취소</button>
+            <button type="submit" id="auth-submit-btn" class="px-4 py-2 text-xs font-medium rounded-lg text-white bg-rose-600 hover:bg-rose-700 transition-colors cursor-pointer shadow-sm">인증 및 이동</button>
           </div>
         </form>
       </div>
-    </dialog>
+    </div>
     
     <main class="w-full min-h-[calc(100vh-65px)] bg-slate-50 flex flex-col">
       <!-- 기본 홈 화면 안내 영역 -->
