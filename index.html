@@ -182,7 +182,7 @@
         if (!response.ok) throw new Error('Failed to load config.json');
         localConfig = await response.json();
       } catch (error) {
-        console.error('Error fetching local config:', error);
+        // 로컬 파일이 없는 것은 배포 환경에서 정상이므로 조용히 넘어감
       }
 
       if (localConfig) {
