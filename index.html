@@ -206,9 +206,10 @@
         if (loginData && loginData.success) {
           try {
             const configRes = await fetch('/config');
-            if (!configRes.ok) return;
-            const configData = await configRes.json();
-            loginData.targetPath = configData.targetPath;
+            if (configRes.ok) {
+              const configData = await configRes.json();
+              loginData.targetPath = configData.targetPath;
+            }
           } catch (configErr) {
             console.error('/config 로드 오류', configErr)
           }
@@ -328,7 +329,8 @@
       e.preventDefault();
       const inputCode = authCodeInput?.value.trim();
       if (!inputCode) return;
-      result = await fetchLocalConfig(inputCode);
+      
+      const result = await fetchLocalConfig(inputCode);
 
       if (result.success) {
         localStorage.setItem('auth_code', inputCode);
@@ -353,22 +355,6 @@
           iframe.style.height = '100vh';
           iframe.style.border = 'none';
           document.body.appendChild(iframe);
-          // try {
-          //   const res = await fetch(targetUrl);
-          //   if (res.ok) {
-          //     const htmlText = await res.text();
-          //     // 브라우저 주소창은 유지하면서 화면 내용만 교체
-          //     document.open();
-          //     document.write(htmlText);
-          //     document.close();
-          //     // 주소창 URL을 깔끔하게 유지
-          //     history.replaceState(null, '', window.location.pathname);
-          //   } else {
-          //     alert("페이지를 불러올 수 없습니다.");
-          //   }
-          // } catch (err) {
-          //   console.error("페이지 로드 실패:", err);
-          // }
         }, 900);
 
       } else {
