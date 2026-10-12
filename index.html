@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>404 Not Found | Cloudflare</title>
 
@@ -176,6 +176,7 @@
 
   <!-- 클라이언트 측 동적 데이터 처리 스크립트 -->
   <script>
+    let localConfig = null;
     /**
      * 1. 접속 호스트명(Hostname) 동적 반영
      * - 현재 사용자가 접속한 도메인(window.location.hostname)을 오리진 서버 카드에 자동 표시합니다.
