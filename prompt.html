@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 프롬프트 생성기 | Prompt Studio</title>
+  <!-- Tailwind CSS v4 브라우저 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <!-- 웹폰트 및 스타일 (대괄호 { } 기준 한 줄 작성) -->
+  <style>
+    @font-face { font-family: 'GMarketSans'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansLight.woff') format('woff'); font-weight: 300; font-display: swap; }
+    @font-face { font-family: 'GMarketSans'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff'); font-weight: 500; font-display: swap; }
+    @font-face { font-family: 'GMarketSans'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff') format('woff'); font-weight: 700; font-display: swap; }
+    html, body { font-family: 'GMarketSans', -apple-system, BlinkMacSystemFont, sans-serif; }
+    dialog::backdrop { background-color: rgba(15, 23, 42, 0.55); backdrop-filter: blur(3px); }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col p-4 sm:p-6 md:p-8 antialiased">
+
+  <!-- ==========================================================================
+       메인 컨테이너 (상단 네비게이션 제외)
+       ========================================================================== -->
+  <main class="max-w-[1400px] w-full mx-auto flex-1 flex flex-col gap-6">
+    
+    <!-- 상단 타이틀 바 -->
+    <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-200">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <span class="text-2xl sm:text-3xl">🪄</span>
+          <h1 class="text-xl sm:text-2xl font-bold text-slate-900">AI 프롬프트 생성기</h1>
+          <span class="px-2.5 py-0.5 bg-blue-50 text-blue-700 text-xs font-bold rounded-full border border-blue-200">Prompt Studio</span>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-500 mt-1">구조화된 프레임워크(Role · Task · Context · Format)를 활용해 최적의 LLM 프롬프트를 만듭니다.</p>
+      </div>
+
+      <!-- 빠른 액션 버튼 -->
+      <div class="flex items-center gap-2">
+        <button id="btn-reset-form" type="button" class="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer">
+          🔄 초기화
+        </button>
+      </div>
+    </div>
+
+    <!-- 2단 그리드: 좌측(프롬프트 빌더) + 우측(실시간 완성본 & 보관함) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start flex-1">
+      
+      <!-- ====================================================================
+           [좌측 6열] 구조화된 프롬프트 빌더
+           ==================================================================== -->
+      <section class="lg:col-span-6 bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col gap-5">
+        
+        <!-- 1. 추천 프리셋 칩 -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-2">⚡ 인기 프롬프트 템플릿 프리셋</label>
+          <div class="flex flex-wrap gap-1.5" id="preset-chips-container">
+            <button type="button" class="btn-preset px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 rounded-lg text-xs font-medium transition-colors cursor-pointer" data-preset="code-review">
+              💻 코드 리팩토링 & 리뷰
+            </button>
+            <button type="button" class="btn-preset px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 rounded-lg text-xs font-medium transition-colors cursor-pointer" data-preset="report">
+              📑 비즈니스 기획서 작성
+            </button>
+            <button type="button" class="btn-preset px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 rounded-lg text-xs font-medium transition-colors cursor-pointer" data-preset="email">
+              ✉️ 정중한 비즈니스 이메일
+            </button>
+            <button type="button" class="btn-preset px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 rounded-lg text-xs font-medium transition-colors cursor-pointer" data-preset="summary">
+              🔍 3줄 핵심 요약 & 인사이트
+            </button>
+          </div>
+        </div>
+
+        <hr class="border-slate-100">
+
+        <!-- 2. 프롬프트 구성 폼 -->
+        <form id="prompt-form" class="space-y-4 text-xs">
+          
+          <!-- 역할 (Role) -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label for="input-role" class="font-bold text-slate-700 flex items-center gap-1.5">
+                <span>🎯 1. 역할 (Role)</span>
+                <span class="text-[10px] text-slate-400 font-normal">AI에게 부여할 페르소나</span>
+              </label>
+              <select id="select-role-quick" class="text-[11px] bg-slate-50 border border-slate-200 rounded px-2 py-0.5 text-slate-600 cursor-pointer">
+                <option value="">직접 입력 또는 선택...</option>
+                <option value="10년 차 시니어 풀스택 개발자이자 소프트웨어 아키텍트">시니어 풀스택 개발자</option>
+                <option value="IT 스타트업의 수석 프로덕트 매니저(PM)">수석 프로덕트 매니저</option>
+                <option value="매력적인 문장력을 갖춘 전문 테크 에디터 및 카피라이터">전문 카피라이터</option>
+                <option value="자연스럽고 품격 있는 문체를 구사하는 전문 한영 번역가">전문 번역가</option>
+              </select>
+            </div>
+            <input
+              type="text"
+              id="input-role"
+              placeholder="예: 10년 차 시니어 풀스택 개발자이자 보안 전문가"
+              class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white text-xs leading-relaxed"
+            >
+          </div>
+
+          <!-- 주요 작업 (Task) -->
+          <div>
+            <label for="input-task" class="block font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+              <span>📌 2. 핵심 작업 (Task)</span>
+              <span class="text-[10px] text-rose-500 font-normal">*필수</span>
+            </label>
+            <textarea
+              id="input-task"
+              rows="3"
+              required
+              placeholder="예: 아래 제공되는 HTML/JavaScript 코드를 분석하여 보안 취약점과 성능 병목 지점을 찾고 최적화된 리팩토링 코드를 작성해 줘."
+              class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white text-xs leading-relaxed resize-none"
+            ></textarea>
+          </div>
+
+          <!-- 배경 및 제약 조건 (Context & Constraints) -->
+          <div>
+            <label for="input-context" class="block font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+              <span>💡 3. 맥락 및 제약사항 (Context & Constraints)</span>
+              <span class="text-[10px] text-slate-400 font-normal">주의할 규칙, 제외 조건 등</span>
+            </label>
+            <textarea
+              id="input-context"
+              rows="3"
+              placeholder="예: 백엔드가 없는 순수 정적 웹 환경(HTML/JS)이어야 하며, 외부 라이브러리 설치 없이 기본 표준 API만 사용해야 함. 설명은 한국어로 작성."
+              class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white text-xs leading-relaxed resize-none"
+            ></textarea>
+          </div>
+
+          <!-- 출력 형식 및 어조 (Format & Tone) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label for="select-format" class="block font-bold text-slate-700 mb-1">📝 출력 형식 (Format)</label>
+              <select id="select-format" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs">
+                <option value="마크다운 서식과 코드 블록을 활용해 가독성 있게 정리">마크다운 서식 + 코드블록</option>
+                <option value="한눈에 비교할 수 있는 깔끔한 마크다운 표(Table) 형태">마크다운 표 (Table)</option>
+                <option value="핵심만 간결하게 번호(1, 2, 3) 매기기 형태">번호 매기기 (List)</option>
+                <option value="구조화된 JSON 데이터 포맷">JSON 포맷</option>
+                <option value="3줄 이내의 핵심 요약">3줄 이내 요약</option>
+              </select>
+            </div>
+            <div>
+              <label for="select-tone" class="block font-bold text-slate-700 mb-1">🎭 어조 및 톤 (Tone)</label>
+              <select id="select-tone" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs">
+                <option value="전문적이고 신뢰감 있는 명확한 어조">전문적이고 명확한 어조</option>
+                <option value="친절하고 이해하기 쉬운 설명조">친절하고 쉬운 설명조</option>
+                <option value="군더더기 없는 초간결 / 직관적인 톤">초간결 / 직관적인 톤</option>
+                <option value="논리적이고 단계별 분석적인 어조">논리적 / 분석적인 어조</option>
+              </select>
+            </div>
+          </div>
+
+        </form>
+
+      </section>
+
+      <!-- ====================================================================
+           [우측 6열] 실시간 완성 프롬프트 & 보관함
+           ==================================================================== -->
+      <section class="lg:col-span-6 flex flex-col gap-5">
+        
+        <!-- 실시간 완성 프롬프트 카드 -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col">
+          <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
+            <div class="flex items-center gap-2">
+              <span class="text-base">📑</span>
+              <h2 class="text-sm font-bold text-slate-900">완성된 최적화 프롬프트</h2>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button id="btn-save-prompt" type="button" class="px-2.5 py-1 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold transition-colors cursor-pointer inline-flex items-center gap-1">
+                <span>💾 보관</span>
+              </button>
+              <button id="btn-copy-prompt" type="button" class="px-3.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold transition-all shadow-xs cursor-pointer inline-flex items-center gap-1">
+                <span id="copy-btn-text">📋 복사하기</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 프롬프트 출력 본문 영역 -->
+          <div class="relative">
+            <textarea
+              id="output-prompt"
+              readonly
+              rows="12"
+              class="w-full p-3.5 bg-slate-900 text-slate-100 rounded-xl text-xs font-mono leading-relaxed resize-none focus:outline-none selection:bg-blue-500 selection:text-white"
+            ></textarea>
+            <span class="absolute right-3 bottom-3 text-[10px] text-slate-500 select-none">클릭하여 전체 확인 가능</span>
+          </div>
+        </div>
+
+        <!-- 내 프롬프트 보관함 (Local Storage) -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col">
+          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+            <div class="flex items-center gap-2">
+              <span class="text-sm">📁</span>
+              <h3 class="text-xs font-bold text-slate-800">내 프롬프트 보관함</h3>
+              <span id="saved-count-badge" class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold">0</span>
+            </div>
+            <span class="text-[11px] text-slate-400">클릭하면 빌더로 즉시 로드됩니다.</span>
+          </div>
+
+          <div id="saved-prompts-container" class="space-y-2 max-h-56 overflow-y-auto pr-1 text-xs">
+            <!-- 저장된 프롬프트 목록 동적 렌더링 -->
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ==========================================================================
+       클라이언트 JavaScript 로직 (프롬프트 실시간 빌드 & 스토리지)
+       ========================================================================== -->
+  <script>
+    // 프리셋 데이터
+    const PRESETS = {
+      "code-review": {
+        role: "10년 차 시니어 풀스택 개발자이자 클린코드 아키텍트",
+        task: "제공된 코드의 가독성, 성능 병목, 보안 취약점(XSS, 메모리 누수 등)을 철저히 리뷰하고 최적화된 리팩토링 코드를 제안해 줘.",
+        context: "1. 변경 전/후 코드를 Before/After 형태로 명확히 제시할 것.\n2. 성능 개선 근거와 유지보수성 측면의 장점을 함께 설명할 것.",
+        format: "마크다운 서식과 코드 블록을 활용해 가독성 있게 정리",
+        tone: "전문적이고 신뢰감 있는 명확한 어조"
+      },
+      "report": {
+        role: "전략 기획 및 사업 개발 전문 수석 컨설턴트",
+        task: "새로운 웹 서비스 런칭을 위한 핵심 기획서 개요를 구조화하여 작성해 줘.",
+        context: "문제 정의, 타겟 고객, 핵심 가치 제안(UVP), 주요 기능 로드맵, 성공 지표(KPI)가 포함되어야 함.",
+        format: "한눈에 비교할 수 있는 깔끔한 마크다운 표(Table) 형태",
+        tone: "논리적이고 단계별 분석적인 어조"
+      },
+      "email": {
+        role: "기업 커뮤니케이션 전문 비즈니스 라이터",
+        task: "프로젝트 납기 일정 조정 및 파트너사 협조를 정중하게 요청하는 비즈니스 이메일을 작성해 줘.",
+        context: "일정 지연 사유를 정중하고 신뢰감 있게 설명하며, 대안 일정을 제시하고 감사의 인사를 전할 것.",
+        format: "핵심만 간결하게 번호(1, 2, 3) 매기기 형태",
+        tone: "전문적이고 신뢰감 있는 명확한 어조"
+      },
+      "summary": {
+        role: "핵심 정보 압축 및 데이터 인사이트 분석 전문가",
+        task: "본문의 복잡한 내용을 3줄 핵심 요약과 실천 가능한 인사이트로 추출해 줘.",
+        context: "불필요한 부연 설명을 배제하고, 핵심 결론과 의사결정에 필요한 정보 위주로 구성할 것.",
+        format: "3줄 이내의 핵심 요약",
+        tone: "군더더기 없는 초간결 / 직관적인 톤"
+      }
+    };
+
+    // DOM 요소
+    const inputRole = document.getElementById("input-role");
+    const inputTask = document.getElementById("input-task");
+    const inputContext = document.getElementById("input-context");
+    const selectFormat = document.getElementById("select-format");
+    const selectTone = document.getElementById("select-tone");
+    const selectRoleQuick = document.getElementById("select-role-quick");
+    const outputPrompt = document.getElementById("output-prompt");
+    const btnCopyPrompt = document.getElementById("btn-copy-prompt");
+    const copyBtnText = document.getElementById("copy-btn-text");
+    const btnSavePrompt = document.getElementById("btn-save-prompt");
+    const btnResetForm = document.getElementById("btn-reset-form");
+    const savedPromptsContainer = document.getElementById("saved-prompts-container");
+    const savedCountBadge = document.getElementById("saved-count-badge");
+
+    let savedPrompts = [];
+
+    // 프롬프트 조립 함수
+    function buildPrompt() {
+      const role = inputRole.value.trim();
+      const task = inputTask.value.trim();
+      const context = inputContext.value.trim();
+      const format = selectFormat.value;
+      const tone = selectTone.value;
+
+      let parts = [];
+
+      if (role) {
+        parts.push(`[역할 및 페르소나]\n당신은 ${role}입니다.`);
+      }
+
+      if (task) {
+        parts.push(`[수행할 작업]\n${task}`);
+      } else {
+        parts.push(`[수행할 작업]\n(수행할 작업을 좌측 입력창에 작성하세요)`);
+      }
+
+      if (context) {
+        parts.push(`[맥락 및 제약조건]\n${context}`);
+      }
+
+      if (format || tone) {
+        let reqs = [];
+        if (format) reqs.push(`- 출력 서식: ${format}`);
+        if (tone) reqs.push(`- 톤앤매너: ${tone}`);
+        parts.push(`[출력 요구사항]\n${reqs.join("\n")}`);
+      }
+
+      outputPrompt.value = parts.join("\n\n");
+    }
+
+    // 입력 이벤트 리스너
+    [inputRole, inputTask, inputContext, selectFormat, selectTone].forEach(el => {
+      el.addEventListener("input", buildPrompt);
+      el.addEventListener("change", buildPrompt);
+    });
+
+    // 역할 퀵 선택
+    selectRoleQuick.addEventListener("change", (e) => {
+      if (e.target.value) {
+        inputRole.value = e.target.value;
+        buildPrompt();
+      }
+    });
+
+    // 프리셋 클릭
+    document.querySelectorAll(".btn-preset").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const key = btn.getAttribute("data-preset");
+        const data = PRESETS[key];
+        if (!data) return;
+
+        inputRole.value = data.role;
+        inputTask.value = data.task;
+        inputContext.value = data.context;
+        selectFormat.value = data.format;
+        selectTone.value = data.tone;
+        buildPrompt();
+      });
+    });
+
+    // 클립보드 복사
+    btnCopyPrompt.addEventListener("click", () => {
+      const text = outputPrompt.value.trim();
+      if (!text) return;
+
+      navigator.clipboard.writeText(text).then(() => {
+        copyBtnText.textContent = "✅ 복사 완료!";
+        setTimeout(() => {
+          copyBtnText.textContent = "📋 복사하기";
+        }, 2000);
+      }).catch(err => {
+        console.error("복사 실패:", err);
+      });
+    });
+
+    // 폼 초기화
+    btnResetForm.addEventListener("click", () => {
+      if (confirm("입력 중인 내용을 초기화하시겠습니까?")) {
+        inputRole.value = "";
+        inputTask.value = "";
+        inputContext.value = "";
+        selectRoleQuick.value = "";
+        selectFormat.selectedIndex = 0;
+        selectTone.selectedIndex = 0;
+        buildPrompt();
+      }
+    });
+
+    // ------------------------------------------------------------------------
+    // 보관함 스토리지 기능
+    // ------------------------------------------------------------------------
+    function loadSavedPrompts() {
+      const saved = localStorage.getItem("my_saved_prompts");
+      savedPrompts = saved ? JSON.parse(saved) : [];
+      renderSavedPrompts();
+    }
+
+    function saveSavedPrompts() {
+      localStorage.setItem("my_saved_prompts", JSON.stringify(savedPrompts));
+      renderSavedPrompts();
+    }
+
+    function renderSavedPrompts() {
+      savedCountBadge.textContent = savedPrompts.length;
+      savedPromptsContainer.innerHTML = "";
+
+      if (savedPrompts.length === 0) {
+        savedPromptsContainer.innerHTML = `
+          <div class="py-6 text-center text-slate-400 text-xs">
+            저장된 프롬프트가 없습니다.<br>상단 [💾 보관] 버튼으로 유용한 조합을 저장해 보세요.
+          </div>
+        `;
+        return;
+      }
+
+      savedPrompts.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "flex items-center justify-between p-2.5 rounded-xl border border-slate-200 hover:bg-blue-50/60 hover:border-blue-200 transition-all cursor-pointer group";
+
+        row.innerHTML = `
+          <div class="flex-1 min-w-0 pr-2">
+            <div class="font-bold text-slate-800 truncate">${item.title}</div>
+            <div class="text-[10px] text-slate-400 mt-0.5 truncate">${item.task}</div>
+          </div>
+          <button type="button" class="btn-del-prompt text-slate-300 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 cursor-pointer leading-none" title="삭제">&times;</button>
+        `;
+
+        // 행 클릭 시 빌더로 복원
+        row.addEventListener("click", (e) => {
+          if (e.target.closest(".btn-del-prompt")) return;
+          inputRole.value = item.role || "";
+          inputTask.value = item.task || "";
+          inputContext.value = item.context || "";
+          selectFormat.value = item.format || selectFormat.options[0].value;
+          selectTone.value = item.tone || selectTone.options[0].value;
+          buildPrompt();
+        });
+
+        // 삭제
+        const delBtn = row.querySelector(".btn-del-prompt");
+        delBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (confirm(`'${item.title}' 프롬프트를 삭제하시겠습니까?`)) {
+            savedPrompts = savedPrompts.filter(p => p.id !== item.id);
+            saveSavedPrompts();
+          }
+        });
+
+        savedPromptsContainer.appendChild(row);
+      });
+    }
+
+    // 프롬프트 보관 버튼 클릭
+    btnSavePrompt.addEventListener("click", () => {
+      const task = inputTask.value.trim();
+      if (!task) {
+        alert("작업(Task) 내용을 입력한 후 보관해 주세요.");
+        return;
+      }
+
+      const defaultTitle = task.length > 20 ? task.slice(0, 20) + "..." : task;
+      const title = prompt("보관할 프롬프트 제목을 입력하세요:", defaultTitle);
+      if (!title) return;
+
+      const newPrompt = {
+        id: "prompt-" + Date.now(),
+        title: title.trim(),
+        role: inputRole.value.trim(),
+        task: task,
+        context: inputContext.value.trim(),
+        format: selectFormat.value,
+        tone: selectTone.value
+      };
+
+      savedPrompts.unshift(newPrompt);
+      saveSavedPrompts();
+      alert("보관함에 저장되었습니다!");
+    });
+
+    // 초기 실행
+    buildPrompt();
+    loadSavedPrompts();
+  </script>
+</body>
+</html>

@@ -30,7 +30,7 @@
           <!-- <a href="/blog.html" class="font-bold text-slate-600 hover:text-slate-900">블로그</a> -->
           <a href="/" class="font-bold text-slate-600 hover:text-slate-900">일정</a>
           <button id="btn-nav-story" type="button" class="flex items-center h-full font-bold text-blue-600 active:border-b-2 active:pb-0.5 hover:text-slate-900 cursor-pointer hidden">일상기록</button>
-          <button id="btn-nav-cash" type="button" class="flex items-center h-full font-bold text-blue-600 active:border-b-2 active:pb-0.5 hover:text-slate-900 cursor-pointer hidden">비용관리</button>
+          <button id="btn-nav-cash" type="button" class="flex items-center h-full font-bold text-blue-600 active:border-b-2 active:pb-0.5 hover:text-slate-900 cursor-pointer hidden">프롬프트</button>
           <a href="/" class="font-bold text-slate-600 hover:text-slate-900">About</a>
         </nav>
 
@@ -291,7 +291,7 @@
     }
     
     btnNavHome?.addEventListener('click', () => loadPage('./home.html'));
-    btnNavCash?.addEventListener('click', () => loadPage('./cash_manage2.html'));
+    btnNavCash?.addEventListener('click', () => loadPage('./prompt.html'));
     btnNavStory?.addEventListener('click', () => loadPage('./story.html'));
     btnNavBlog?.addEventListener('click', () => loadPage('./blog.html'));
     // 모바일 일상기록 / 비용관리 이동
