@@ -25,8 +25,9 @@
         
         <!-- 중앙 네비게이션 -->
         <nav class="hidden gap-6 md:flex items-center text-sm font-medium">
-          <a href="/" class="font-bold text-slate-600 hover:text-slate-900">홈</a>
-          <a href="/" class="font-bold text-slate-600 hover:text-slate-900">블로그</a>
+          <button id="btn-nav-home" type="button" class="flex items-center h-full font-bold text-blue-600 active:border-b-2 active:pb-0.5 hover:text-slate-900 cursor-pointer hidden">HOME</button>
+          <button id="btn-nav-blog" type="button" class="flex items-center h-full font-bold text-blue-600 active:border-b-2 active:pb-0.5 hover:text-slate-900 cursor-pointer hidden">블로그</button>
+          <!-- <a href="/blog.html" class="font-bold text-slate-600 hover:text-slate-900">블로그</a> -->
           <a href="/" class="font-bold text-slate-600 hover:text-slate-900">일정</a>
           <button id="btn-nav-story" type="button" class="flex items-center h-full font-bold text-blue-600 active:border-b-2 active:pb-0.5 hover:text-slate-900 cursor-pointer hidden">일상기록</button>
           <button id="btn-nav-cash" type="button" class="flex items-center h-full font-bold text-blue-600 active:border-b-2 active:pb-0.5 hover:text-slate-900 cursor-pointer hidden">비용관리</button>
@@ -159,6 +160,8 @@
     const authCodeMessage = document.getElementById('authCodeMessage');
     const btnNavCash = document.getElementById('btn-nav-cash');
     const btnNavStory = document.getElementById('btn-nav-story');
+    const btnNavBlog = document.getElementById('btn-nav-blog');
+    const btnNavHome = document.getElementById('btn-nav-home');
     const btnMobileStory = document.getElementById('btn-mobile-nav-story');
     const btnMobileCash = document.getElementById('btn-mobile-nav-cash');
     const headerAuthArea = document.getElementById('header-auth-area');
@@ -249,6 +252,8 @@
       if (isAuth) {
         btnNavCash.classList.remove('hidden')
         btnNavStory.classList.remove('hidden')
+        btnNavBlog?.classList.remove('hidden');
+        btnNavHome?.classList.remove('hidden');
 
         headerAuthArea.innerHTML = `
           <button id="btn-logout" class="px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs border border-slate-300 text-slate-600 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 rounded-md font-semibold cursor-pointer transition-all">
@@ -258,7 +263,9 @@
         document.getElementById('btn-logout')?.addEventListener('click', Logout);
       } else {
         btnNavCash?.classList.add('hidden');
-        btnNavStory.classList.add('hidden')
+        btnNavStory?.classList.add('hidden');
+        btnNavBlog?.classList.add('hidden');
+        btnNavHome?.classList.add('hidden');
         if (headerAuthArea) {
           headerAuthArea.innerHTML = '';
         }
@@ -282,10 +289,12 @@
       contentFrame.classList.remove('hidden');
     }
     
+    btnNavHome?.addEventListener('click', () => loadPage('./home.html'));
     btnNavCash?.addEventListener('click', () => loadPage('./cash_manage2.html'));
-    btnNavStory?.addEventListener('click', () => loadPage('./cash_manage3.html'));
+    btnNavStory?.addEventListener('click', () => loadPage('./story.html'));
+    btnNavBlog?.addEventListener('click', () => loadPage('./blog.html'));
     // 모바일 일상기록 / 비용관리 이동
-    btnMobileStory?.addEventListener('click', () => loadPage('./cash_manage3.html'));
+    btnMobileStory?.addEventListener('click', () => loadPage('./story.html'));
     btnMobileCash?.addEventListener('click', () => loadPage('./cash_manage2.html'));
     updateMenuAuthState();
 

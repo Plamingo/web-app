@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>일상기록 AI 채팅 | Gemini</title>
+  <!-- Tailwind CSS v4 브라우저 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <!-- 웹폰트 및 스타일 (대괄호 { } 기준 한 줄 작성) -->
+  <style>
+    @font-face { font-family: 'GMarketSans'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansLight.woff') format('woff'); font-weight: 300; font-display: swap; }
+    @font-face { font-family: 'GMarketSans'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff'); font-weight: 500; font-display: swap; }
+    @font-face { font-family: 'GMarketSans'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff') format('woff'); font-weight: 700; font-display: swap; }
+    html, body { font-family: 'GMarketSans', -apple-system, BlinkMacSystemFont, sans-serif; }
+    dialog::backdrop { background-color: rgba(15, 23, 42, 0.55); backdrop-filter: blur(3px); }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
+
+  <!-- ==========================================================================
+       공통 상단 Header & Navigation (규칙 5 준수)
+       ========================================================================== -->
+  <header class="sticky top-0 z-50 w-full bg-white border-b border-slate-200 py-3.5 px-4 sm:px-8">
+    <div class="max-w-[1560px] mx-auto flex items-center justify-between">
+      <!-- 우측 검색창 및 버튼 구성 -->
+      <div class="flex items-center gap-1.5">
+        <button id="btn-open-api-modal" title="Gemini API 설정" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer">
+          <span>⚙️ API 설정</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       메인 컨텐츠: Gemini AI 어시스턴트 채팅 인터페이스
+       ========================================================================== -->
+  <main class="max-w-[1000px] w-full mx-auto px-4 sm:px-6 py-6 flex-1 flex flex-col">
+    
+    <!-- 채팅 헤더 카드 -->
+    <div class="bg-white border border-slate-200 rounded-t-2xl p-4 sm:p-5 flex items-center justify-between shadow-xs">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white text-lg shadow-sm">
+          ✨
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base sm:text-lg font-bold text-slate-900">일상기록 AI 어시스턴트</h1>
+            <span id="current-model-badge" class="px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-bold rounded-md">gemini-3.5-flash-lite</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-0.5">오늘 하루의 일상, 생각, 회고를 나누고 정리해 보세요.</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="btn-clear-chat" title="대화 내용 초기화" class="px-2.5 py-1.5 text-xs text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer border border-slate-200">
+          🗑️ 대화 비우기
+        </button>
+      </div>
+    </div>
+
+    <!-- 채팅 메시지 스크롤 영역 -->
+    <div id="chat-messages" class="flex-1 bg-white border-x border-slate-200 p-4 sm:p-6 overflow-y-auto space-y-4 min-h-[460px] max-h-[60vh]">
+      <!-- 환영 메시지 -->
+      <div class="flex items-start gap-3">
+        <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center text-sm shrink-0">
+          ✨
+        </div>
+        <div class="bg-slate-100 text-slate-800 text-xs sm:text-sm p-4 rounded-2xl rounded-tl-sm max-w-[85%] leading-relaxed shadow-xs">
+          안녕하세요! 오늘 어떤 일들이 있었나요? 사소한 이야기나 떠오르는 생각을 편하게 말씀해 주시면, 함께 기록하고 정리해 드릴게요. 😊
+        </div>
+      </div>
+    </div>
+
+    <!-- 하단 입력 및 추천 질문 영역 -->
+    <div class="bg-white border border-slate-200 rounded-b-2xl p-4 shadow-sm flex flex-col gap-3">
+      
+      <!-- 추천 질문 칩 (Quick Prompts) -->
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] text-slate-600">
+        <span class="text-slate-400 shrink-0 font-medium">💡 추천:</span>
+        <button type="button" class="quick-prompt-btn px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-full shrink-0 transition-colors cursor-pointer">
+          오늘 있었던 일 일기로 정리해줘
+        </button>
+        <button type="button" class="quick-prompt-btn px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-full shrink-0 transition-colors cursor-pointer">
+          오늘 하루 3줄 감사 일기 작성해줘
+        </button>
+        <button type="button" class="quick-prompt-btn px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-full shrink-0 transition-colors cursor-pointer">
+          생산성을 높이기 위한 주간 회고 질문 3가지
+        </button>
+      </div>
+
+      <!-- 입력 폼 -->
+      <form id="chat-form" class="relative flex items-end gap-2">
+        <textarea
+          id="chat-input"
+          rows="2"
+          placeholder="메시지를 입력하세요... (Enter 전송 / Shift + Enter 줄바꿈)"
+          class="w-full p-3 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white resize-none leading-relaxed transition-all"
+        ></textarea>
+        <button
+          type="submit"
+          id="btn-send"
+          class="h-10 px-4 sm:px-5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm rounded-xl shrink-0 flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <span>전송</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </button>
+      </form>
+
+      <div class="flex items-center justify-between text-[11px] text-slate-400 px-1">
+        <span id="api-status-text">연결 준비 완료</span>
+        <span>Google Gemini API</span>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==========================================================================
+       API Key 설정 다이얼로그 (<dialog id="api-modal">)
+       ========================================================================== -->
+  <dialog id="api-modal" class="w-full max-w-md rounded-2xl p-0 border border-slate-200 shadow-2xl bg-white text-slate-800 m-auto">
+    <div class="p-6 flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <span>⚙️</span><span>Gemini API 설정</span>
+        </h3>
+        <button type="button" id="btn-close-api-modal" class="text-slate-400 hover:text-slate-600 text-2xl p-1 leading-none cursor-pointer">&times;</button>
+      </div>
+
+      <p class="text-xs text-slate-500 mb-4 leading-relaxed">
+        Google AI Studio에서 발급받은 Gemini API 키와 사용할 모델을 설정하세요. 입력된 정보는 브라우저 로컬 저장소에 안전하게 보관됩니다.
+      </p>
+
+      <div class="mb-3">
+        <label class="block text-xs font-semibold text-slate-700 mb-1">AI 모델 선택</label>
+        <select id="select-model" class="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500">
+          <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite</option>
+          <option value="gemini-3.8-flash">gemini-3.8-flash</option>
+        </select>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-xs font-semibold text-slate-700 mb-1">API Key</label>
+        <input type="password" id="input-api-key" placeholder="AIzaSy..." class="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono">
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+        <button type="button" id="btn-cancel-api-modal" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-semibold cursor-pointer">
+          취소
+        </button>
+        <button type="button" id="btn-save-api-key" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold cursor-pointer shadow-sm">
+          저장하기
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ==========================================================================
+       Gemini API 연동 및 채팅 스크립트
+       ========================================================================== -->
+  <script>
+    let geminiApiKey = "";
+    let currentModel = localStorage.getItem("gemini_model") || "gemini-3.5-flash-lite";
+    let chatHistory = []; // { role: "user" | "model", parts: [{ text: "..." }] }
+
+    const chatMessagesEl = document.getElementById("chat-messages");
+    const chatForm = document.getElementById("chat-form");
+    const chatInput = document.getElementById("chat-input");
+    const btnSend = document.getElementById("btn-send");
+    const btnClearChat = document.getElementById("btn-clear-chat");
+    const apiStatusText = document.getElementById("api-status-text");
+    const currentModelBadge = document.getElementById("current-model-badge");
+
+    // API 모달 DOM
+    const apiModal = document.getElementById("api-modal");
+    const btnOpenApiModal = document.getElementById("btn-open-api-modal");
+    const btnCloseApiModal = document.getElementById("btn-close-api-modal");
+    const btnCancelApiModal = document.getElementById("btn-cancel-api-modal");
+    const btnSaveApiKey = document.getElementById("btn-save-api-key");
+    const inputApiKey = document.getElementById("input-api-key");
+    const selectModel = document.getElementById("select-model");
+
+    // 1. API 키 및 모델 초기화
+    async function initApiKey() {
+      if (currentModelBadge) {
+        currentModelBadge.textContent = currentModel;
+      }
+      if (selectModel) {
+        selectModel.value = currentModel;
+      }
+
+      const savedKey = localStorage.getItem("gemini_api_key");
+      if (savedKey) {
+        geminiApiKey = savedKey;
+        apiStatusText.textContent = "✅ API Key 연결됨";
+        return;
+      }
+
+      // 로컬 config.json 확인
+      try {
+        const res = await fetch("./config.json");
+        const contentType = res.headers.get("content-type");
+        if (res.ok && contentType && contentType.includes("application/json")) {
+          const cfg = await res.json();
+          if (cfg.API_KEY) {
+            geminiApiKey = cfg.API_KEY;
+            apiStatusText.textContent = "✅ config.json 키 연동됨";
+            return;
+          }
+        }
+      } catch (e) {}
+
+      // 서버 /config 엔드포인트 확인
+      try {
+        const res = await fetch("/config");
+        if (res.ok) {
+          const cfg = await res.json();
+          if (cfg.API_KEY) {
+            geminiApiKey = cfg.API_KEY;
+            apiStatusText.textContent = "✅ 서버 API Key 연동됨";
+            return;
+          }
+        }
+      } catch (e) {}
+
+      apiStatusText.textContent = "⚠️ API Key를 설정해 주세요";
+    }
+
+    // 2. 대화 히스토리 로드 및 렌더링
+    function loadChatHistory() {
+      const saved = localStorage.getItem("gemini_chat_history");
+      if (saved) {
+        try {
+          chatHistory = JSON.parse(saved);
+          chatHistory.forEach(msg => {
+            appendMessage(msg.role, msg.parts[0].text, false);
+          });
+        } catch (e) {}
+      }
+    }
+
+    // 3. 메시지 추가 렌더링
+    function appendMessage(role, text, shouldScroll = true) {
+      const isUser = role === "user";
+      const wrapper = document.createElement("div");
+      wrapper.className = `flex items-start gap-3 ${isUser ? "justify-end" : "justify-start"}`;
+
+      // 텍스트 포맷 (개행 처리 및 간단한 볼드 변환)
+      const formattedText = escapeHtml(text)
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>');
+
+      if (isUser) {
+        wrapper.innerHTML = `
+          <div class="bg-blue-600 text-white text-xs sm:text-sm p-3.5 rounded-2xl rounded-tr-sm max-w-[80%] leading-relaxed shadow-xs">
+            ${formattedText}
+          </div>
+          <div class="w-8 h-8 rounded-lg bg-slate-200 text-slate-600 flex items-center justify-center text-xs shrink-0 font-bold">
+            나
+          </div>
+        `;
+      } else {
+        wrapper.innerHTML = `
+          <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center text-sm shrink-0">
+            ✨
+          </div>
+          <div class="bg-slate-100 text-slate-800 text-xs sm:text-sm p-4 rounded-2xl rounded-tl-sm max-w-[85%] leading-relaxed shadow-xs">
+            ${formattedText}
+          </div>
+        `;
+      }
+
+      chatMessagesEl.appendChild(wrapper);
+      if (shouldScroll) {
+        chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+      }
+    }
+
+    // 로딩 인디케이터 생성
+    function showLoading() {
+      const loadingEl = document.createElement("div");
+      loadingEl.id = "loading-indicator";
+      loadingEl.className = "flex items-start gap-3";
+      loadingEl.innerHTML = `
+        <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center text-sm shrink-0">
+          ✨
+        </div>
+        <div class="bg-slate-100 text-slate-500 text-xs sm:text-sm px-4 py-3 rounded-2xl rounded-tl-sm inline-flex items-center gap-2 shadow-xs">
+          <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+          <span>생각하는 중...</span>
+        </div>
+      `;
+      chatMessagesEl.appendChild(loadingEl);
+      chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+      return loadingEl;
+    }
+
+    function removeLoading() {
+      const indicator = document.getElementById("loading-indicator");
+      if (indicator) indicator.remove();
+    }
+
+    // HTML 태그 이스케이프
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // 4. Gemini API 요청 (실시간 시각 systemInstruction 주입)
+    async function sendMessageToGemini(userText) {
+      if (!geminiApiKey) {
+        alert("Gemini API Key가 설정되지 않았습니다. 우측 상단 [⚙️ API 설정]에서 키를 등록해 주세요.");
+        apiModal.showModal();
+        return;
+      }
+
+      // 화면에 사용자 메시지 출력
+      appendMessage("user", userText);
+      chatHistory.push({ role: "user", parts: [{ text: userText }] });
+
+      // 로딩 표시 및 입력 비활성화
+      btnSend.disabled = true;
+      chatInput.disabled = true;
+      showLoading();
+
+      try {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${geminiApiKey}`;
+        
+        // 최근 최대 10개의 대화 문맥 유지
+        const contextHistory = chatHistory.slice(-10);
+
+        // 현재 대한민국 기준 실시간 날짜/시각 생성
+        const nowString = new Date().toLocaleString("ko-KR", {
+          timeZone: "Asia/Seoul",
+          dateStyle: "full",
+          timeStyle: "medium"
+        });
+
+        // 시스템 프롬프트: 실시간 기준 시각 및 비서 역할 부여
+        const requestPayload = {
+          systemInstruction: {
+            parts: [{
+              text: `당신은 친절한 개인비서 AI입니다. 현재 대한민국 기준 실시간 날짜와 시각은 [${nowString}]입니다. 사용자가 오늘 날짜, 요일, 시간, 일정, 일상 회고 등을 질문하면 반드시 이 기준 시각을 바탕으로 정확하게 답변하세요.`
+            }]
+          },
+          contents: contextHistory
+        };
+
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestPayload)
+        });
+
+        if (!response.ok) {
+          const errData = await response.json();
+          throw new Error(errData?.error?.message || "API 요청 실패");
+        }
+
+        const data = await response.json();
+        const aiResponseText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "답변을 불러오지 못했습니다.";
+
+        removeLoading();
+        appendMessage("model", aiResponseText);
+        chatHistory.push({ role: "model", parts: [{ text: aiResponseText }] });
+        
+        // 로컬스토리지에 저장
+        localStorage.setItem("gemini_chat_history", JSON.stringify(chatHistory));
+
+      } catch (err) {
+        removeLoading();
+        console.error("Gemini Error:", err);
+        appendMessage("model", `⚠️ 오류가 발생했습니다: ${err.message}\nAPI 키 유효성 또는 모델 설정을 확인해 주세요.`);
+      } finally {
+        btnSend.disabled = false;
+        chatInput.disabled = false;
+        chatInput.focus();
+      }
+    }
+
+    // 5. 이벤트 리스너 등록
+    chatForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = chatInput.value.trim();
+      if (!text) return;
+      chatInput.value = "";
+      sendMessageToGemini(text);
+    });
+
+    // Enter 전송 / Shift + Enter 줄바꿈 처리
+    chatInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        chatForm.requestSubmit();
+      }
+    });
+
+    // 추천 질문 버튼 클릭
+    document.querySelectorAll(".quick-prompt-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        chatInput.value = btn.textContent.trim();
+        chatInput.focus();
+      });
+    });
+
+    // 대화 초기화
+    btnClearChat.addEventListener("click", () => {
+      if (confirm("대화 내역을 모두 지우시겠습니까?")) {
+        chatHistory = [];
+        localStorage.removeItem("gemini_chat_history");
+        chatMessagesEl.innerHTML = `
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center text-sm shrink-0">✨</div>
+            <div class="bg-slate-100 text-slate-800 text-xs sm:text-sm p-4 rounded-2xl rounded-tl-sm max-w-[85%] leading-relaxed shadow-xs">
+              대화 내역이 초기화되었습니다. 새로운 이야기를 시작해 보세요! 😊
+            </div>
+          </div>
+        `;
+      }
+    });
+
+    // API 모달 열기/닫기
+    btnOpenApiModal.addEventListener("click", () => {
+      inputApiKey.value = geminiApiKey;
+      if (selectModel) selectModel.value = currentModel;
+      apiModal.showModal();
+    });
+    btnCloseApiModal.addEventListener("click", () => apiModal.close());
+    btnCancelApiModal.addEventListener("click", () => apiModal.close());
+
+    btnSaveApiKey.addEventListener("click", () => {
+      const key = inputApiKey.value.trim();
+      const model = selectModel ? selectModel.value : "gemini-3.5-flash-lite";
+
+      if (!key) {
+        alert("API 키를 입력해 주세요.");
+        return;
+      }
+      geminiApiKey = key;
+      currentModel = model;
+
+      localStorage.setItem("gemini_api_key", key);
+      localStorage.setItem("gemini_model", model);
+
+      if (currentModelBadge) currentModelBadge.textContent = model;
+      apiStatusText.textContent = `✅ [${model}] 연결됨`;
+      apiModal.close();
+      alert("API Key와 모델 설정이 정상적으로 저장되었습니다.");
+    });
+
+    apiModal.addEventListener("click", (e) => {
+      if (e.target === apiModal) apiModal.close();
+    });
+
+    // 초기 실행
+    initApiKey();
+    loadChatHistory();
+  </script>
+</body>
+</html>

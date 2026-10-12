@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>홈 | 업무 체크리스트 & Jira 칸반보드</title>
+  <!-- Tailwind CSS v4 브라우저 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <!-- 웹폰트 및 스타일 (대괄호 { } 기준 한 줄 작성) -->
+  <style>
+    @font-face { font-family: 'GMarketSans'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansLight.woff') format('woff'); font-weight: 300; font-display: swap; }
+    @font-face { font-family: 'GMarketSans'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff'); font-weight: 500; font-display: swap; }
+    @font-face { font-family: 'GMarketSans'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff') format('woff'); font-weight: 700; font-display: swap; }
+    html, body { font-family: 'GMarketSans', -apple-system, BlinkMacSystemFont, sans-serif; }
+    dialog::backdrop { background-color: rgba(15, 23, 42, 0.55); backdrop-filter: blur(3px); }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
+
+
+  <!-- ==========================================================================
+       메인 컨텐츠: 진행 업무 & 체크리스트(좌) + Jira 스타일 칸반 보드(우)
+       ========================================================================== -->
+  <main class="max-w-[1560px] w-full mx-auto px-4 sm:px-8 py-6 flex-1 flex flex-col">
+    
+    <!-- 서브 타이틀 바 -->
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-200">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">💼</span>
+          <h1 class="text-xl sm:text-2xl font-bold text-slate-800">업무 대시보드</h1>
+          <span class="px-2.5 py-0.5 bg-blue-50 text-blue-700 rounded-full text-xs font-semibold border border-blue-200">Sprint 24</span>
+        </div>
+        <p class="text-xs text-slate-500 mt-1">진행 중인 업무 체크리스트와 Jira 스타일 칸반 보드로 업무를 관리합니다.</p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="btn-add-work" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 transition-all shadow-xs cursor-pointer">
+          <span>➕ 새 업무 프로젝트</span>
+        </button>
+        <button id="btn-add-jira-issue" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 transition-all shadow-xs cursor-pointer">
+          <span>➕ 새 할 일 추가</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 2단 레이아웃 그리드 (좌 40% ~ 45%, 우 55% ~ 60%) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start flex-1">
+      
+      <!-- ====================================================================
+           [좌측] 진행 업무 리스트 및 체크리스트 관리 (lg:col-span-5)
+           ==================================================================== -->
+      <section class="lg:col-span-5 flex flex-col gap-5">
+        
+        <!-- 진행 업무 헤더 카드 -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+              <span>📌</span><span>진행 중인 업무 목록</span>
+            </h2>
+            <span id="work-total-count" class="text-xs text-slate-500 font-medium">총 0건</span>
+          </div>
+
+          <!-- 업무 프로젝트 탭 리스트 -->
+          <div id="work-card-list" class="space-y-3">
+            <!-- 동적으로 렌더링됩니다 -->
+          </div>
+        </div>
+
+        <!-- 선택된 업무의 세부 체크리스트 패널 -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
+          <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
+            <div>
+              <span id="selected-work-tag" class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-600">업무</span>
+              <h3 id="selected-work-title" class="text-sm font-bold text-slate-800 mt-1">업무를 선택하세요</h3>
+            </div>
+            <div class="text-right">
+              <span id="checklist-progress-text" class="text-xs font-bold text-blue-600">0%</span>
+              <span class="text-[11px] text-slate-400 block">완료율</span>
+            </div>
+          </div>
+
+          <!-- 프로그레스 바 -->
+          <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-4">
+            <div id="checklist-progress-bar" class="bg-blue-600 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+
+          <!-- 체크리스트 항목 입력 폼 -->
+          <form id="checklist-add-form" class="flex items-center gap-2 mb-4">
+            <input
+              type="text"
+              id="input-new-checklist"
+              placeholder="새 체크리스트 항목 입력..."
+              class="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+              required
+            >
+            <button type="submit" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold shrink-0 cursor-pointer">
+              추가
+            </button>
+          </form>
+
+          <!-- 체크리스트 아이템 목록 -->
+          <div id="checklist-items-container" class="space-y-2 max-h-72 overflow-y-auto pr-1">
+            <!-- 동적 렌더링 -->
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ====================================================================
+           [우측] To-Do List 테이블 관리 영역 (lg:col-span-7)
+           ==================================================================== -->
+      <section class="lg:col-span-7 bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col">
+        
+        <!-- To-Do 테이블 상단 헤더 & 필터 바 -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
+          <div class="flex items-center gap-2">
+            <span class="text-lg">📋</span>
+            <h2 class="text-sm font-bold text-slate-800">To-Do List</h2>
+            <span id="todo-total-badge" class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full text-xs font-bold">0건</span>
+          </div>
+
+          <!-- 상태별 필터 탭 버튼 -->
+          <div class="flex items-center gap-1 text-xs" id="todo-filter-group">
+            <button type="button" class="btn-todo-filter px-2.5 py-1 rounded-lg font-semibold bg-blue-600 text-white cursor-pointer" data-filter="all">전체</button>
+            <button type="button" class="btn-todo-filter px-2.5 py-1 rounded-lg font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer" data-filter="todo">할 일</button>
+            <button type="button" class="btn-todo-filter px-2.5 py-1 rounded-lg font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer" data-filter="inprogress">진행 중</button>
+            <button type="button" class="btn-todo-filter px-2.5 py-1 rounded-lg font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer" data-filter="done">완료</button>
+          </div>
+        </div>
+
+        <!-- 할 일 테이블 목록 -->
+        <div class="overflow-x-auto min-h-[420px]">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold select-none">
+                <th class="py-2.5 px-3 w-32 whitespace-nowrap">상태</th>
+                <th class="py-2.5 px-3 min-w-[200px]">할 일 내용</th>
+                <th class="py-2.5 px-3 w-24 text-center whitespace-nowrap">우선순위</th>
+                <th class="py-2.5 px-3 w-20 text-center whitespace-nowrap">관리</th>
+              </tr>
+            </thead>
+            <tbody id="todo-table-tbody" class="divide-y divide-slate-100">
+              <!-- 테이블 행이 동적으로 렌더링됩니다 -->
+            </tbody>
+          </table>
+          <div id="todo-empty-state" class="py-12 text-center text-slate-400 text-xs hidden">
+            해당하는 할 일이 없습니다. [➕ 새 할 일 추가]로 등록해 보세요!
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ==========================================================================
+       모달 1: 새 업무 프로젝트 생성 (<dialog id="work-modal">)
+       ========================================================================== -->
+  <dialog id="work-modal" class="w-full max-w-md rounded-2xl p-0 border border-slate-200 shadow-2xl bg-white text-slate-800 m-auto">
+    <form id="work-form" method="dialog" class="p-6 flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <span>📌</span><span>새 업무 프로젝트 추가</span>
+        </h3>
+        <button type="button" id="btn-close-work-modal" class="text-slate-400 hover:text-slate-600 text-2xl p-1 leading-none cursor-pointer">&times;</button>
+      </div>
+
+      <div class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">업무 프로젝트명</label>
+          <input type="text" id="work-input-title" required placeholder="예: 2026 하반기 개인비서 개편" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">카테고리</label>
+            <select id="work-input-tag" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50">
+              <option value="개발">개발</option>
+              <option value="기획">기획</option>
+              <option value="디자인">디자인</option>
+              <option value="운영">운영</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">마감 기한</label>
+            <input type="date" id="work-input-due" required class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50">
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+        <button type="button" id="btn-cancel-work-modal" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-semibold cursor-pointer">
+          취소
+        </button>
+        <button type="submit" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold cursor-pointer shadow-sm">
+          등록하기
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ==========================================================================
+       모달 2: 새 할 일(To-Do) 추가 (<dialog id="jira-modal">)
+       ========================================================================== -->
+  <dialog id="jira-modal" class="w-full max-w-md rounded-2xl p-0 border border-slate-200 shadow-2xl bg-white text-slate-800 m-auto">
+    <form id="jira-form" method="dialog" class="p-6 flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <span>📋</span><span>새 할 일(To-Do) 추가</span>
+        </h3>
+        <button type="button" id="btn-close-jira-modal" class="text-slate-400 hover:text-slate-600 text-2xl p-1 leading-none cursor-pointer">&times;</button>
+      </div>
+
+      <div class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">할 일 내용</label>
+          <input type="text" id="jira-input-title" required placeholder="예: Cloudflare Functions 라우팅 안정화" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">우선순위</label>
+            <select id="jira-input-priority" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50">
+              <option value="High">🔴 High (높음)</option>
+              <option value="Medium" selected>🟡 Medium (중간)</option>
+              <option value="Low">🟢 Low (낮음)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">초기 상태</label>
+            <select id="jira-input-status" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 bg-slate-50">
+              <option value="todo">할 일 (To Do)</option>
+              <option value="inprogress">진행 중 (In Progress)</option>
+              <option value="done">완료 (Done)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+        <button type="button" id="btn-cancel-jira-modal" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-semibold cursor-pointer">
+          취소
+        </button>
+        <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold cursor-pointer shadow-sm">
+          등록하기
+        </button>
+      </div>
+    </form>
+  </dialog>
+    </form>
+  </dialog>
+
+  <!-- ==========================================================================
+       자바스크립트 로직 (업무 체크리스트 & Jira 칸반)
+       ========================================================================== -->
+  <script>
+    // ------------------------------------------------------------------------
+    // 1. 초기 기본 샘플 데이터
+    // ------------------------------------------------------------------------
+    const DEFAULT_WORKS = [
+      {
+        id: "work-1",
+        title: "개인비서 웹앱 고도화 프로젝트",
+        tag: "개발",
+        due: "2026-10-31",
+        checklists: [
+          { id: "c-1", text: "Cloudflare Functions 보안 점검", done: true },
+          { id: "c-2", text: "노션 스타일 블로그 페이지(blog.html) 생성", done: true },
+          { id: "c-3", text: "Gemini AI 연동 일상기록 챗봇(story.html) 구현", done: true },
+          { id: "c-4", text: "홈 대시보드 및 Jira 칸반보드(home.html) 연동", done: false }
+        ]
+      },
+      {
+        id: "work-2",
+        title: "가계 및 자산관리 데이터 리팩토링",
+        tag: "기획",
+        due: "2026-11-15",
+        checklists: [
+          { id: "c-5", text: "Google Sheets API 키 권한 분리", done: true },
+          { id: "c-6", text: "축의금/부의금 카테고리 필터링 UX 개선", done: false }
+        ]
+      }
+    ];
+
+    const DEFAULT_JIRA_ISSUES = [
+      { id: "JIRA-101", title: "로그인 인증 코드 경로 은닉 및 SPA 리다이렉트", type: "Story", priority: "High", status: "done" },
+      { id: "JIRA-102", title: "iframe 뷰포트 여백(body 패딩) 제거 및 전체화면 밀착", type: "Bug", priority: "High", status: "done" },
+      { id: "JIRA-103", title: "Gemini 3.5 Flash-lite / 3.8 Flash 모델 선택기 구현", type: "Task", priority: "Medium", status: "inprogress" },
+      { id: "JIRA-104", title: "실시간 한국 시각(systemInstruction) 프롬프트 동기화", type: "Task", priority: "Medium", status: "inprogress" },
+      { id: "JIRA-105", title: "Jira 칸반보드 드래그 앤 드롭 상태 전환 테스트", type: "Task", priority: "Low", status: "todo" }
+    ];
+
+    // 상태 저장소
+    let works = [];
+    let selectedWorkId = null;
+    let jiraIssues = [];
+    let draggedIssueId = null;
+
+    // DOM 요소
+    const workCardList = document.getElementById("work-card-list");
+    const workTotalCount = document.getElementById("work-total-count");
+    const selectedWorkTag = document.getElementById("selected-work-tag");
+    const selectedWorkTitle = document.getElementById("selected-work-title");
+    const checklistProgressText = document.getElementById("checklist-progress-text");
+    const checklistProgressBar = document.getElementById("checklist-progress-bar");
+    const checklistItemsContainer = document.getElementById("checklist-items-container");
+    const checklistAddForm = document.getElementById("checklist-add-form");
+    const inputNewChecklist = document.getElementById("input-new-checklist");
+
+    // To-Do 테이블 DOM
+    const todoTableTbody = document.getElementById("todo-table-tbody");
+    const todoTotalBadge = document.getElementById("todo-total-badge");
+    const todoEmptyState = document.getElementById("todo-empty-state");
+    const todoFilterButtons = document.querySelectorAll(".btn-todo-filter");
+    let currentTodoFilter = "all";
+
+    // 모달 DOM
+    const workModal = document.getElementById("work-modal");
+    const workForm = document.getElementById("work-form");
+    const btnAddWork = document.getElementById("btn-add-work");
+    const btnCloseWorkModal = document.getElementById("btn-close-work-modal");
+    const btnCancelWorkModal = document.getElementById("btn-cancel-work-modal");
+
+    const jiraModal = document.getElementById("jira-modal");
+    const jiraForm = document.getElementById("jira-form");
+    const btnAddJiraIssue = document.getElementById("btn-add-jira-issue");
+    const btnCloseJiraModal = document.getElementById("btn-close-jira-modal");
+    const btnCancelJiraModal = document.getElementById("btn-cancel-jira-modal");
+
+    // ------------------------------------------------------------------------
+    // 2. 초기 로드 및 저장
+    // ------------------------------------------------------------------------
+    function initData() {
+      const savedWorks = localStorage.getItem("app_works");
+      works = savedWorks ? JSON.parse(savedWorks) : DEFAULT_WORKS;
+
+      const savedJira = localStorage.getItem("app_jira_issues");
+      jiraIssues = savedJira ? JSON.parse(savedJira) : DEFAULT_JIRA_ISSUES;
+
+      if (works.length > 0 && !selectedWorkId) {
+        selectedWorkId = works[0].id;
+      }
+
+      renderWorks();
+      renderChecklist();
+      renderTodoTable();
+    }
+
+    function saveWorks() {
+      localStorage.setItem("app_works", JSON.stringify(works));
+    }
+
+    function saveJiraIssues() {
+      localStorage.setItem("app_jira_issues", JSON.stringify(jiraIssues));
+    }
+
+    // ------------------------------------------------------------------------
+    // 3. 업무 프로젝트 및 체크리스트 렌더링
+    // ------------------------------------------------------------------------
+    function renderWorks() {
+      workTotalCount.textContent = `총 ${works.length}건`;
+      workCardList.innerHTML = "";
+
+      works.forEach(w => {
+        const isSelected = w.id === selectedWorkId;
+        const total = w.checklists.length;
+        const done = w.checklists.filter(c => c.done).length;
+        const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+
+        const card = document.createElement("div");
+        card.className = `p-3.5 rounded-xl border transition-all cursor-pointer ${
+          isSelected ? "bg-blue-50/70 border-blue-300 shadow-xs ring-1 ring-blue-200" : "bg-white border-slate-200 hover:bg-slate-50"
+        }`;
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${
+              w.tag === "개발" ? "bg-sky-50 text-sky-700 border border-sky-200" : "bg-purple-50 text-purple-700 border border-purple-200"
+            }">${w.tag}</span>
+            <span class="text-[11px] text-slate-400">📅 ${w.due}</span>
+          </div>
+          <h4 class="text-xs sm:text-sm font-bold text-slate-800 leading-snug mb-2">${w.title}</h4>
+          <div class="flex items-center justify-between text-[11px] text-slate-500 mb-1">
+            <span>체크리스트: ${done}/${total}</span>
+            <span class="font-bold text-blue-600">${pct}%</span>
+          </div>
+          <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+            <div class="bg-blue-600 h-full rounded-full" style="width: ${pct}%"></div>
+          </div>
+        `;
+
+        card.addEventListener("click", () => {
+          selectedWorkId = w.id;
+          renderWorks();
+          renderChecklist();
+        });
+
+        workCardList.appendChild(card);
+      });
+    }
+
+    function renderChecklist() {
+      const curWork = works.find(w => w.id === selectedWorkId) || works[0];
+      if (!curWork) {
+        selectedWorkTitle.textContent = "등록된 업무가 없습니다";
+        checklistItemsContainer.innerHTML = "<p class='text-xs text-slate-400 text-center py-4'>업무를 먼저 추가해 주세요.</p>";
+        return;
+      }
+
+      selectedWorkTitle.textContent = curWork.title;
+      selectedWorkTag.textContent = curWork.tag;
+
+      const total = curWork.checklists.length;
+      const done = curWork.checklists.filter(c => c.done).length;
+      const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+
+      checklistProgressText.textContent = `${pct}% (${done}/${total})`;
+      checklistProgressBar.style.width = `${pct}%`;
+
+      checklistItemsContainer.innerHTML = "";
+
+      if (curWork.checklists.length === 0) {
+        checklistItemsContainer.innerHTML = "<p class='text-xs text-slate-400 text-center py-4'>체크리스트 항목이 비어있습니다. 위에서 추가해 보세요.</p>";
+        return;
+      }
+
+      curWork.checklists.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 group border border-transparent hover:border-slate-100 transition-colors";
+        row.innerHTML = `
+          <label class="flex items-center gap-2.5 flex-1 cursor-pointer select-none">
+            <input type="checkbox" ${item.done ? "checked" : ""} class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer">
+            <span class="text-xs ${item.done ? "line-through text-slate-400 font-normal" : "text-slate-700 font-medium"}">${item.text}</span>
+          </label>
+          <button type="button" class="btn-del-checklist text-slate-300 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 cursor-pointer" title="삭제">
+            &times;
+          </button>
+        `;
+
+        // 체크박스 토글
+        const checkbox = row.querySelector("input[type='checkbox']");
+        checkbox.addEventListener("change", (e) => {
+          item.done = e.target.checked;
+          saveWorks();
+          renderWorks();
+          renderChecklist();
+        });
+
+        // 삭제
+        const delBtn = row.querySelector(".btn-del-checklist");
+        delBtn.addEventListener("click", () => {
+          curWork.checklists = curWork.checklists.filter(c => c.id !== item.id);
+          saveWorks();
+          renderWorks();
+          renderChecklist();
+        });
+
+        checklistItemsContainer.appendChild(row);
+      });
+    }
+
+    // 새 체크리스트 추가 폼
+    checklistAddForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = inputNewChecklist.value.trim();
+      if (!text) return;
+
+      const curWork = works.find(w => w.id === selectedWorkId);
+      if (!curWork) return;
+
+      curWork.checklists.push({
+        id: "c-" + Date.now(),
+        text: text,
+        done: false
+      });
+
+      inputNewChecklist.value = "";
+      saveWorks();
+      renderWorks();
+      renderChecklist();
+    });
+
+    // ------------------------------------------------------------------------
+    // 4. To-Do 테이블 렌더링 & 관리
+    // ------------------------------------------------------------------------
+    function getPriorityBadge(priority) {
+      switch (priority) {
+        case "High": return "<span class='text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200/60'>🔴 High</span>";
+        case "Medium": return "<span class='text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200/60'>🟡 Medium</span>";
+        case "Low": return "<span class='text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/60'>🟢 Low</span>";
+        default: return "";
+      }
+    }
+
+    function getStatusSelectHtml(currentStatus, id) {
+      return `
+        <select class="btn-status-select px-2 py-1 rounded text-xs font-semibold border cursor-pointer ${
+          currentStatus === 'done' 
+            ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+            : currentStatus === 'inprogress' 
+              ? 'bg-blue-50 text-blue-700 border-blue-200' 
+              : 'bg-slate-100 text-slate-700 border-slate-200'
+        }" data-id="${id}">
+          <option value="todo" ${currentStatus === 'todo' ? 'selected' : ''}>📋 할 일</option>
+          <option value="inprogress" ${currentStatus === 'inprogress' ? 'selected' : ''}>⚡ 진행 중</option>
+          <option value="done" ${currentStatus === 'done' ? 'selected' : ''}>✅ 완료</option>
+        </select>
+      `;
+    }
+
+    function renderTodoTable() {
+      todoTotalBadge.textContent = `${jiraIssues.length}건`;
+
+      const filtered = jiraIssues.filter(item => {
+        if (currentTodoFilter === "all") return true;
+        return item.status === currentTodoFilter;
+      });
+
+      todoTableTbody.innerHTML = "";
+
+      if (filtered.length === 0) {
+        todoEmptyState.classList.remove("hidden");
+      } else {
+        todoEmptyState.classList.add("hidden");
+      }
+
+      filtered.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.className = `hover:bg-slate-50 transition-colors ${item.status === 'done' ? 'bg-slate-50/50' : ''}`;
+
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 whitespace-nowrap">
+            ${getStatusSelectHtml(item.status, item.id)}
+          </td>
+          <td class="py-2.5 px-3">
+            <span class="font-medium ${item.status === 'done' ? 'line-through text-slate-400' : 'text-slate-800'}">${item.title}</span>
+          </td>
+          <td class="py-2.5 px-3 text-center whitespace-nowrap">
+            ${getPriorityBadge(item.priority)}
+          </td>
+          <td class="py-2.5 px-3 text-center whitespace-nowrap">
+            <button type="button" class="btn-del-todo px-2 py-1 text-xs text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded transition-colors cursor-pointer" data-id="${item.id}">
+              삭제
+            </button>
+          </td>
+        `;
+
+        // 상태 변경 이벤트
+        const selectEl = tr.querySelector(".btn-status-select");
+        selectEl.addEventListener("change", (e) => {
+          item.status = e.target.value;
+          saveJiraIssues();
+          renderTodoTable();
+        });
+
+        // 삭제 이벤트
+        const delBtn = tr.querySelector(".btn-del-todo");
+        delBtn.addEventListener("click", () => {
+          if (confirm(`'${item.title}' 할 일을 삭제하시겠습니까?`)) {
+            jiraIssues = jiraIssues.filter(i => i.id !== item.id);
+            saveJiraIssues();
+            renderTodoTable();
+          }
+        });
+
+        todoTableTbody.appendChild(tr);
+      });
+    }
+
+    // 필터 버튼 클릭 이벤트
+    todoFilterButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        currentTodoFilter = btn.getAttribute("data-filter");
+        
+        // 스타일 업데이트
+        todoFilterButtons.forEach(b => {
+          b.className = "btn-todo-filter px-2.5 py-1 rounded-lg font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer";
+        });
+        btn.className = "btn-todo-filter px-2.5 py-1 rounded-lg font-semibold bg-blue-600 text-white cursor-pointer";
+
+        renderTodoTable();
+      });
+    });
+
+    // ------------------------------------------------------------------------
+    // 5. 모달 이벤트 등록
+    // ------------------------------------------------------------------------
+    // 새 업무 프로젝트 모달
+    btnAddWork.addEventListener("click", () => {
+      document.getElementById("work-input-title").value = "";
+      document.getElementById("work-input-due").value = new Date().toISOString().split("T")[0];
+      workModal.showModal();
+    });
+    btnCloseWorkModal.addEventListener("click", () => workModal.close());
+    btnCancelWorkModal.addEventListener("click", () => workModal.close());
+
+    workForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const title = document.getElementById("work-input-title").value.trim();
+      const tag = document.getElementById("work-input-tag").value;
+      const due = document.getElementById("work-input-due").value;
+
+      if (!title) return;
+
+      const newWork = {
+        id: "work-" + Date.now(),
+        title: title,
+        tag: tag,
+        due: due,
+        checklists: []
+      };
+
+      works.unshift(newWork);
+      selectedWorkId = newWork.id;
+      saveWorks();
+      workModal.close();
+      renderWorks();
+      renderChecklist();
+    });
+
+    // To-Do 등록 모달
+    btnAddJiraIssue.addEventListener("click", () => {
+      document.getElementById("jira-input-title").value = "";
+      jiraModal.showModal();
+    });
+    btnCloseJiraModal.addEventListener("click", () => jiraModal.close());
+    btnCancelJiraModal.addEventListener("click", () => jiraModal.close());
+
+    jiraForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const title = document.getElementById("jira-input-title").value.trim();
+      const priority = document.getElementById("jira-input-priority").value;
+      const status = document.getElementById("jira-input-status").value;
+
+      if (!title) return;
+
+      const nextNum = jiraIssues.length + 101;
+      const newIssue = {
+        id: `TASK-${nextNum}`,
+        title: title,
+        priority: priority,
+        status: status
+      };
+
+      jiraIssues.unshift(newIssue);
+      saveJiraIssues();
+      jiraModal.close();
+      renderTodoTable();
+    });
+
+    // 모달 배경 클릭 닫기
+    [workModal, jiraModal].forEach(d => {
+      d.addEventListener("click", (e) => {
+        if (e.target === d) d.close();
+      });
+    });
+
+    // ------------------------------------------------------------------------
+    // 초기화 실행
+    // ------------------------------------------------------------------------
+    initData();
+  </script>
+</body>
+</html>

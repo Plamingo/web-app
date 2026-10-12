@@ -1,13 +1,14 @@
 // functions/config.js
 export async function onRequest(context) {
   // Cloudflare 대시보드에서 설정한 환경변수 객체 (context.env)
-  const { API_KEY, SPREADSHEET_ID, TARGET_PAGE } = context.env;
+  const { API_KEY, SPREADSHEET_ID, TARGET_PAGE, gemini_API_KEY } = context.env;
 
   return new Response(
     JSON.stringify({
       API_KEY: API_KEY,
       SPREADSHEET_ID: SPREADSHEET_ID,
       targetPath: TARGET_PAGE,
+      gemini_API_KEY : gemini_API_KEY,
     }),
     {
       headers: {

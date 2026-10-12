@@ -337,23 +337,30 @@
         localStorage.setItem('is_authenticated', 'true');
         
 
-        authCodeMessage.textContent = '✅ 인증코드가 정상확인되었습니다.';1
+        authCodeMessage.textContent = '✅ 인증코드가 정상확인되었습니다.';
         authCodeMessage.className = 'text-[11px] mt-1.5 text-emerald-600 font-semibold';
         authCodeMessage.classList.remove('hidden');
         setTimeout(async () => {
           authModal?.classList.add("hidden");
           const targetUrl = result.targetPath;
 
-          // 화면 전체를 덮는 iframe 동적 생성
+          // body의 기존 Tailwind 패딩(p-4 md:p-8) 및 마진 완전 초기화
+          document.body.className = '';
           document.body.innerHTML = '';
           document.body.style.margin = '0';
+          document.body.style.padding = '0';
           document.body.style.overflow = 'hidden';
 
+          // 화면 전체(100%)에 밀착하는 iframe 생성
           const iframe = document.createElement('iframe');
           iframe.src = targetUrl;
+          iframe.style.position = 'fixed';
+          iframe.style.top = '0';
+          iframe.style.left = '0';
           iframe.style.width = '100vw';
           iframe.style.height = '100vh';
           iframe.style.border = 'none';
+          iframe.style.display = 'block';
           document.body.appendChild(iframe);
         }, 900);
 
