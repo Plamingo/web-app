@@ -12,7 +12,7 @@
       html {font-family: "GMarketSans";}
     </style>
   </head>
-  <body class="h-screen overflow-hidden">
+  <body class="min-h-screen flex flex-col bg-slate-50">
     <header class="sticky top-0 z-50 w-full bg-white border-b border-slate-200 py-3.5 px-4 sm:px-8">
       <div class="max-w-[1560px] mx-auto flex items-center justify-between">
         <!-- 좌측 로고 -->
@@ -55,7 +55,7 @@
         </div>
       </div>
     </header>
-     <nav class="mobile-nav fixed inset-x-3 z-50 bg-white/95 border border-slate-200 shadow-xl backdrop-blur-md bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] p-2 rounded-2xl sm:hidden">
+     <nav class="mobile-nav fixed inset-x-3 z-50 bg-white/95 border border-slate-200 shadow-xl backdrop-blur-md bottom-[calc(2rem+env(safe-area-inset-bottom,0px))] p-2 rounded-2xl sm:hidden">
       <div class="mobile-nav-inner mx-auto grid grid-cols-3 gap-1">
         <button id="btn-mobile-nav-home" type="button" class="flex items-center justify-center min-h-12 rounded-full text-base font-bold text-blue-600 active:border-b-2 active:pb-0.5 hover:text-slate-900 hover:shadow-lg cursor-pointer">홈</button>
         <button id="btn-mobile-nav-story" type="button" class="flex items-center justify-center min-h-12 rounded-full text-base font-bold text-blue-600 active:border-b-2 active:pb-0.5 hover:text-slate-900 hover:shadow-lg cursor-pointer">일상기록</button>
@@ -162,6 +162,7 @@
     const btnNavStory = document.getElementById('btn-nav-story');
     const btnNavBlog = document.getElementById('btn-nav-blog');
     const btnNavHome = document.getElementById('btn-nav-home');
+    const btnMobileHome = document.getElementById('btn-mobile-nav-home');
     const btnMobileStory = document.getElementById('btn-mobile-nav-story');
     const btnMobileCash = document.getElementById('btn-mobile-nav-cash');
     const headerAuthArea = document.getElementById('header-auth-area');
@@ -294,8 +295,9 @@
     btnNavStory?.addEventListener('click', () => loadPage('./story.html'));
     btnNavBlog?.addEventListener('click', () => loadPage('./blog.html'));
     // 모바일 일상기록 / 비용관리 이동
+    btnMobileHome?.addEventListener('click', () => loadPage('./home.html'));
     btnMobileStory?.addEventListener('click', () => loadPage('./story.html'));
-    btnMobileCash?.addEventListener('click', () => loadPage('./cash_manage2.html'));
+    btnMobileCash?.addEventListener('click', () => loadPage('./blog.html'));
     updateMenuAuthState();
 
   </script>
