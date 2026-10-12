@@ -8,7 +8,7 @@ export async function onRequest(context) {
       API_KEY: API_KEY,
       SPREADSHEET_ID: SPREADSHEET_ID,
       targetPath: TARGET_PAGE,
-      gemini_API_KEY : gemini_API_KEY,
+      gemini_API_KEY: gemini_API_KEY,
     }),
     {
       headers: {

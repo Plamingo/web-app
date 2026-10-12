@@ -214,8 +214,8 @@
         const res = await fetch("/config");
         if (res.ok) {
           const cfg = await res.json();
-          if (cfg.API_KEY) {
-            geminiApiKey = cfg.API_KEY;
+          if (cfg.gemini_API_KEY) {
+            geminiApiKey = cfg.gemini_API_KEY;
             apiStatusText.textContent = "✅ 서버 API Key 연동됨";
             return;
           }
