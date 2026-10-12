@@ -117,14 +117,11 @@
     </section>
 
     <!-- 네비게이션 액션 버튼 영역 -->
-    <!-- <div class="flex flex-wrap gap-3 mb-10">
+    <div class="flex flex-wrap gap-3 mb-10">
       <a href="/" class="inline-flex items-center justify-center gap-2 py-2.5 px-5 rounded-lg text-sm font-medium text-white bg-[#f38020] hover:bg-[#d96e14] transition-colors border border-transparent cursor-pointer shadow-sm">
         홈페이지로 이동 (Home)
       </a>
-      <button type="button" onclick="history.back()" class="inline-flex items-center justify-center gap-2 py-2.5 px-5 rounded-lg text-sm font-medium bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors cursor-pointer shadow-sm">
-        이전 페이지 (Go Back)
-      </button>
-    </div> -->
+    </div>
   </main>
 
   <!-- 하단 푸터 영역: Ray ID, IP, 브랜딩 및 타임스탬프 -->
@@ -177,6 +174,39 @@
   <!-- 클라이언트 측 동적 데이터 처리 스크립트 -->
   <script>
     let localConfig = null;
+
+    async function fetchLocalConfig(userAuthCode) {
+      // 로컬 config.json 파일을 비동기적으로 가져와서 localConfig 변수에 저장
+      try {
+        const response = await fetch('./config.json');
+        if (!response.ok) throw new Error('Failed to load config.json');
+        localConfig = await response.json();
+      } catch (error) {
+        console.error('Error fetching local config:', error);
+      }
+
+      if (localConfig) {
+        if (userAuthCode === localConfig.Admin_Code) {
+          const path = localConfig.Target_Path;
+          return {success:true, role: 'admin', targetPath: path};
+        }
+        return {success: false};
+      }
+
+      // 2. 로컬 config.json 없으면 서버에 요청
+      try {
+        const res = await fetch('/login', {
+          method: 'POST',
+          headers: {'content-type': 'application/json; charset=UTF-8'},
+          body: JSON.stringify({authCode: userAuthCode})
+        });
+        return await res.json();
+      } catch (err) {
+        console.error("error occured", err);
+        alert("통신 중 오류 발생하였습니다.");
+      }
+    }
+    
     /**
      * 1. 접속 호스트명(Hostname) 동적 반영
      * - 현재 사용자가 접속한 도메인(window.location.hostname)을 오리진 서버 카드에 자동 표시합니다.
@@ -205,64 +235,65 @@
      * - 정적 테스트 환경에서도 실제 오류 화면과 동일한 형태의 식별자를 시뮬레이션합니다.
      * @returns {string} 16자리의 무작위 16진수 문자열 (예: "8f921ab4cd7e098a")
      */
-    // function generateRayId() {
-    //   const hex = "0123456789abcdef";
-    //   let id = "";
-    //   for (let i = 0; i < 16; i++) {
-    //     id += hex[Math.floor(Math.random() * hex.length)];
-    //   }
-    //   return id;
-    // }
+    function generateRayId() {
+      const hex = "0123456789abcdef";
+      let id = "";
+      for (let i = 0; i < 16; i++) {
+        id += hex[Math.floor(Math.random() * hex.length)];
+      }
+      return id;
+    }
 
     // 생성된 Ray ID를 화면의 #ray-id 엘리먼트에 적용
-    // const rayEl = document.getElementById("ray-id");
-    // const generatedId = generateRayId();
-    // if (rayEl) rayEl.textContent = generatedId;
+    const rayEl = document.getElementById("ray-id");
+    const generatedId = generateRayId();
+    if (rayEl) rayEl.textContent = generatedId;
 
     /**
      * 4. Ray ID 클립보드 원클릭 복사 기능
      * - 웹 표준 Clipboard API(navigator.clipboard.writeText)를 호출하여 화면의 Ray ID를 복사합니다.
      * - 복사 성공 시 사용자가 인지할 수 있도록 버튼 문구를 2초간 "Copied!"로 변경 후 원상 복구합니다.
      */
-    // function copyRayId() {
-    //   const text = rayEl ? rayEl.textContent : generatedId;
-    //   navigator.clipboard.writeText(text).then(() => {
-    //     const copyBtn = document.getElementById("copy-btn");
-    //     if (copyBtn) {
-    //       copyBtn.textContent = "Copied!";
-    //       setTimeout(() => { copyBtn.textContent = "Copy Ray ID"; }, 2000);
-    //     }
-    //   }).catch((err) => {
-    //     console.error("클립보드 복사 실패:", err);
-    //   });
-    // }
+    function copyRayId() {
+      const text = rayEl ? rayEl.textContent : generatedId;
+      navigator.clipboard.writeText(text).then(() => {
+        const copyBtn = document.getElementById("copy-btn");
+        if (copyBtn) {
+          copyBtn.textContent = "Copied!";
+          setTimeout(() => { copyBtn.textContent = "Copy Ray ID"; }, 2000);
+        }
+      }).catch((err) => {
+        console.error("클립보드 복사 실패:", err);
+      });
+    }
 
     /**
      * 5. 클라이언트 IP 보호 및 클릭 시 확인 기능
      * - 개인정보 보호를 위해 초기 상태에서는 마스킹(Click to reveal)되어 있습니다.
      * - 사용자가 해당 텍스트를 클릭했을 때 로컬 더미 IP 주소("127.0.0.1 (Hidden)")를 노출합니다.
      */
-    // const ipEl = document.getElementById("client-ip");
-    // if (ipEl) {
-    //   ipEl.style.cursor = "pointer";
-    //   ipEl.addEventListener("click", () => {
-    //     ipEl.textContent = "127.0.0.1 (Hidden)";
-    //   });
-    // }
+    const ipEl = document.getElementById("client-ip");
+    if (ipEl) {
+      ipEl.style.cursor = "pointer";
+      ipEl.addEventListener("click", () => {
+        ipEl.textContent = "127.0.0.1 (Dummy)";
+      });
+    }
+
     const secretAuthBtn = document.getElementById("secret-auth-btn");
     const authModal = document.getElementById("auth-modal");
     const authCloseBtn = document.getElementById("auth-close-btn");
     const authCancelBtn = document.getElementById("auth-cancel-btn");
     const authForm = document.getElementById("auth-form");
     const authCodeInput = document.getElementById("auth-code-input");
-    const authErrorMsg = document.getElementById("auth-error-msg");
+    const authCodeMessage = document.getElementById("auth-error-msg");
 
     function openAuthModal() {
       if (!authModal) return;
       authModal.classList.remove("hidden");
-      if (authErrorMsg) authErrorMsg.classList.add("hidden");
+      authCodeMessage.classList.add('hidden');
       if (authCodeInput) {
-        authCodeInput.value = "";
+        authCodeInput.value = localStorage.getItem('auth_code') || "";
         setTimeout(() => authCodeInput.focus(), 50);
       }
     }
@@ -270,32 +301,74 @@
     function closeAuthModal() {
       if (!authModal) return;
       authModal.classList.add("hidden");
-      if (authErrorMsg) authErrorMsg.classList.add("hidden");
     }
 
-    function handleAuthSubmit() {
-      if (!authCodeInput) return;
-      const inputCode = authCodeInput.value.trim();
-      const correctCode = "admin123"; // 실제 환경에서는 서버 측에서 검증해야 함
-      if (inputCode === correctCode) {
-        window.location.href = "/index2.html"; // 인증 성공 시 이동할 페이지
-      } else {
-        if (authErrorMsg) authErrorMsg.classList.remove("hidden");
-        authCodeInput.focus();
-        authCodeInput.select();
-      }
-    }
+    //   if (inputCode === correctCode) {
+    //     window.location.href = "/index2.html"; // 인증 성공 시 이동할 페이지
+    //   } 
+
     secretAuthBtn?.addEventListener('click', openAuthModal);
     authCloseBtn?.addEventListener('click', closeAuthModal);
     authCancelBtn?.addEventListener('click', closeAuthModal);
-    if (authForm) {
-      authForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        handleAuthSubmit();
-      });
-    }
 
+    authForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const inputCode = authCodeInput?.value.trim();
+      if (!inputCode) return;
+      result = await fetchLocalConfig(inputCode);
 
+      if (result.success) {
+        localStorage.setItem('auth_code', inputCode);
+        localStorage.setItem('is_authenticated', 'true');
+        
+
+        authCodeMessage.textContent = '✅ 인증코드가 정상확인되었습니다.';1
+        authCodeMessage.className = 'text-[11px] mt-1.5 text-emerald-600 font-semibold';
+        authCodeMessage.classList.remove('hidden');
+        setTimeout(async () => {
+          authModal?.classList.add("hidden");
+          const targetUrl = result.targetPath;
+
+          // 화면 전체를 덮는 iframe 동적 생성
+          document.body.innerHTML = '';
+          document.body.style.margin = '0';
+          document.body.style.overflow = 'hidden';
+
+          const iframe = document.createElement('iframe');
+          iframe.src = targetUrl;
+          iframe.style.width = '100vw';
+          iframe.style.height = '100vh';
+          iframe.style.border = 'none';
+          document.body.appendChild(iframe);
+          // try {
+          //   const res = await fetch(targetUrl);
+          //   if (res.ok) {
+          //     const htmlText = await res.text();
+          //     // 브라우저 주소창은 유지하면서 화면 내용만 교체
+          //     document.open();
+          //     document.write(htmlText);
+          //     document.close();
+          //     // 주소창 URL을 깔끔하게 유지
+          //     history.replaceState(null, '', window.location.pathname);
+          //   } else {
+          //     alert("페이지를 불러올 수 없습니다.");
+          //   }
+          // } catch (err) {
+          //   console.error("페이지 로드 실패:", err);
+          // }
+        }, 900);
+
+      } else {
+        // 인증실패 메시지 출력
+        authCodeMessage.textContent = '❌ 인증코드가 일치하지 않습니다. 다시 확인해 주세요.'
+        authCodeMessage.className = 'text-[11px] mt-1.5 text-rose-600 font-semibold';
+        authCodeMessage.classList.remove("hidden");
+
+        authCodeInput?.focus();
+        authCodeInput?.select();
+      }
+    });
+    
   </script>
 </body>
 </html>
